@@ -519,11 +519,16 @@ select m."Уч.",
  )
  select "Уч.",
         "№",
-        split_part("№+", ')', 1)::varchar(3) "спец №",
+        case when split_part("№+", ')', 1) = '' then NULL
+             else split_part("№+", ')', 1)
+         end ::varchar(3) "спец №",
         "Утрата",
         cardinality(regexp_split_to_array(t, ',\s?'))::int2 "Видов на площадке",
         unnest(regexp_split_to_array(t, ',\s?')) "Вид или род"       
  from b;
+
+COMMENT ON TABLE "Бирюлёвский дендропарк"."Маточные площадки по паспорту ОКН" IS '«Опись дендрологической коллекции»,
+Приложение №3 к предмету охраны объекта культурного наследия регионального значения, нормализованно в I нормальную форму';
 
 CREATE TABLE "Бирюлёвский дендропарк"."МП сверка Дмитрия" (
 	"Адрес" varchar NOT NULL,
