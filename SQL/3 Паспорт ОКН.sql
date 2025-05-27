@@ -1248,5 +1248,160 @@ select "OSM",
 from b
 order by "Уч." asc, "№", "№доп";
 
+-- РАЗНЫЕ СВЕРКИ И ПЕРЕЧНИ --
+create or replace view "Бирюлёвский дендропарк"."№ площадок по ОСМ" as
+with b as (
+select distinct
+		a.osm_id,
+	    a.osm_type,
+	    u."№" AS "Уч.",
+	    a.tags ->> 'ref'::text "Код",
+	    a.tags,
+	    (((regexp_matches(a.tags ->> 'ref'::text, '\d+'::text))[1])::smallint) "№"
+   from "Бирюлёвский дендропарк"."OSM ∀" a
+   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+   where (a.tags ->> 'ref'::text) is not null
+     and (((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
+     and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
+         )
+      or (a.tags ->> 'ref:start_date'::text) is not null
+),
+uq as (
+select distinct
+       "Уч.",
+       "Код",
+       №
+  from b
+order by "Уч.", №, "Код"  
+)
+select *, row_number() over () "id" from uq;
 
+create view "Бирюлёвский дендропарк"."OSM geom маточные площадки" as
+select  m.*,
+		a.osm_id,
+	    a.osm_type,
+	    a.geom,
+        st_area(a.geom) AS "площадь"
+--	    a.tags,
+   from "Бирюлёвский дендропарк"."OSM ∀" a 
+   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+   left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
+     on m."Уч." =  u."№"
+    and m."Код" = a.tags ->> 'ref'
+   where (a.tags ->> 'ref'::text) is not null
+     and ((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
+     and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
+order by "Уч.", №, "Код";
 
+create view "Бирюлёвский дендропарк"."OSM насаждения" as
+select  distinct 
+	m.*,
+    (string_to_array(a.tags ->> 'taxon'::text, ';'::text)) AS taxon,
+    (string_to_array(a.tags ->> 'taxon:ru'::text, ';'::text)) AS "вид",
+    (string_to_array(a.tags ->> 'genus'::text, ';'::text)) AS genus,
+    (string_to_array(a.tags ->> 'genus:ru'::text, ';'::text)) AS "род",
+    a.tags ->> 'source:taxon'::text AS "Подтверждение",
+    a.tags ->> 'natural'::text AS "Тип посадки",
+    a.tags ->> 'leaf_cycle'::text AS "Листопадность",
+    a.tags ->> 'leaf_type'::text AS "Листва",
+    a.tags ->> 'start_date'::text AS "Создано",
+    a.tags ->> 'note'::text AS "Заметки",
+    a.tags ->> 'description'::text AS "Описание",
+    a.tags ->> 'fixme'::text AS "Исправить",
+    (a.tags ->> 'was:taxon'::text) IS NOT NULL AS "Вырублен"	    
+   from "Бирюлёвский дендропарк"."OSM ∀" a 
+   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+   left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
+     on m."Уч." =  u."№"
+    and m."Код" = a.tags ->> 'ref'
+   where (a.tags ->> 'ref'::text) is not null
+     and ((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
+     and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
+order by "Уч.", №, "Код";
+
+create view "Бирюлёвский дендропарк"."OSM виды" as
+with виды as (
+select distinct 
+	m.*,
+	unnest(string_to_array(a.tags ->> 'taxon'::text, ';'::text)) AS taxon,
+    coalesce(cardinality(string_to_array(a.tags ->> 'taxon'::text, ';'::text)),
+             cardinality(string_to_array(a.tags ->> 'genus'::text, ';'::text))) AS "видов на посадке",
+    unnest(string_to_array(a.tags ->> 'taxon:ru'::text, ';'::text)) AS "вид",
+    unnest(string_to_array(a.tags ->> 'genus'::text, ';'::text)) AS genus,
+    unnest(string_to_array(a.tags ->> 'genus:ru'::text, ';'::text)) AS "род"	    
+   from "Бирюлёвский дендропарк"."OSM ∀" a 
+   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+   left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
+     on m."Уч." =  u."№"
+    and m."Код" = a.tags ->> 'ref'
+   where (a.tags ->> 'ref'::text) is not null
+     and ((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
+     and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
+order by "Уч.", №, "Код"
+)
+select distinct
+       "Уч.", "Код", №, id,
+	   coalesce(taxon, genus) taxon,
+       "видов на посадке",
+       coalesce(вид, род) вид,
+       coalesce(genus, regexp_substr(taxon, '^\S+\s')) genus,
+       coalesce(род, regexp_substr(вид, '^\S+\s')) род
+from виды
+order by "Уч.", №, "Код";
+
+create view "Бирюлёвский дендропарк"."Виды по сверке Дмитрия" as
+-- Регулярный вид
+with b as (
+select "Адрес" ~ '\*' "OSM",
+       "Адрес" !~ '\*' "План 1978",
+       split_part("Адрес", '×', 1)::int2 "Уч.",
+       regexp_substr(replace(split_part("Адрес", '×', 2), '*', ''), '^\d+')::int2 "№",
+       split_part("Адрес", '×', 3) "№доп",
+       "Флаг",
+       unnest(regexp_split_to_array(mp."Растения", ';\s?')) "Вид или род"
+from "Бирюлёвский дендропарк"."Маточные площадки по сверке Дмитр" mp
+)
+select "OSM",
+       "План 1978",
+       "Уч.",
+       "№",
+       "№доп",
+       "Флаг",
+       regexp_replace("Вид или род", '\^|\*', '') "Вид или род",
+       "Вид или род" ~ '\*' "Утрата",
+       "Вид или род" ~ '\^' "После 2020"
+from b
+order by "Уч." asc, "№", "№доп";
+
+create view "Бирюлёвский дендропарк"."№ площадок по сверке Дмитрия" as
+with b as (
+select "Адрес" !~ '\*' "План 1978",
+       split_part("Адрес", '×', 1)::int2 "Уч.",
+       regexp_substr(replace(split_part("Адрес", '×', 2), '*', ''), '^\d+')::int2 "№",
+       1::bool "сверка 2019"
+from "Бирюлёвский дендропарк"."Маточные площадки по сверке Дмитр" mp
+)
+select *
+from b
+where "№" is not null -- Новая экспозиция редких видов растений
+order by "Уч." asc, "№";
+
+create view "Бирюлёвский дендропарк"."№ площадок по паспорту ОКН" as
+with b as (
+select distinct "Уч.",
+       "№"
+from "Бирюлёвский дендропарк"."Маточные площадки по паспорту ОКН" o
+)
+select *, 1::bool "пасп ОКН"
+from b
+order by "Уч." asc, "№";
+
+-- Суммарная сверка по адресации маточных площадок
+select "Уч.","№", "Код", "пасп ОКН" is not null "пасп ОКН", "сверка 2019" is not null "сверка 2019",
+       "Код" is not null "OSM"
+  from "Бирюлёвский дендропарк"."№ площадок по ОСМ" o
+  full join "Бирюлёвский дендропарк"."№ площадок по паспорту ОКН" p
+ using ("Уч.","№")
+  full join  "Бирюлёвский дендропарк"."№ площадок по сверке Дмитрия" s
+ using ("Уч.","№")
+ order by "Уч.","№";
