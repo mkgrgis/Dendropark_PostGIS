@@ -17,11 +17,11 @@ COMMENT ON TABLE "Бирюлёвский дендропарк"."∀ osmium" IS '
 
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Основная граница"
 AS SELECT "oпп".tags ->> 'name'::text AS "Название",
-    "oпп".tags ->> 'operator'::text AS "Оператор",
-    "oпп".osm_id,
-    "oпп".geom
-   FROM "Бирюлёвский дендропарк"."∀ osmium" "oпп"
-  WHERE ("oпп".tags ->> 'leisure'::text) = 'park'::text AND ("oпп".tags ->> 'name'::text) = 'Бирюлёвский дендропарк'::text;
+	"oпп".tags ->> 'operator'::text AS "Оператор",
+	"oпп".osm_id,
+	"oпп".geom
+FROM "Бирюлёвский дендропарк"."∀ osmium" "oпп"
+WHERE ("oпп".tags ->> 'leisure'::text) = 'park'::text AND ("oпп".tags ->> 'name'::text) = 'Бирюлёвский дендропарк'::text;
 
 COMMENT ON VIEW "Бирюлёвский дендропарк"."Основная граница" IS 'Фильтр, выделяющий из данных, содержащих Бирюлёвский дендропарк его границу.';
 
@@ -29,22 +29,22 @@ COMMENT ON VIEW "Бирюлёвский дендропарк"."Основная 
 CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк"."OSM ∀"
 TABLESPACE pg_default
 AS SELECT "oпп".osm_id,
-    "oпп".osm_type,
-    "oпп".tags,
-    st_intersection("ог".geom, "oпп".geom) AS geom,
-    st_geometrytype(st_intersection("ог".geom, "oпп".geom)) geom_type
-   FROM "Бирюлёвский дендропарк"."∀ osmium" "oпп"
-     JOIN "Бирюлёвский дендропарк"."Основная граница" "ог" ON st_intersects("ог".geom, "oпп".geom)
+	"oпп".osm_type,
+	"oпп".tags,
+	st_intersection("ог".geom, "oпп".geom) AS geom,
+	st_geometrytype(st_intersection("ог".geom, "oпп".geom)) geom_type
+	FROM "Бирюлёвский дендропарк"."∀ osmium" "oпп"
+	JOIN "Бирюлёвский дендропарк"."Основная граница" "ог" ON st_intersects("ог".geom, "oпп".geom)
 WITH DATA;
 
 COMMENT ON MATERIALIZED VIEW "Бирюлёвский дендропарк"."OSM ∀" IS 'Все данные, относящиеся к Бирюлёвскому дендропарку включая данные на его границах.';
 
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Участки"
 AS SELECT osm_id,
-    osm_type,
-    (tags ->> 'name'::text)::smallint AS "№",
-    tags ->> 'description'::text AS "Описание",
-    geom
+		osm_type,
+		(tags ->> 'name'::text)::smallint AS "№",
+		tags ->> 'description'::text AS "Описание",
+		geom
    FROM "Бирюлёвский дендропарк"."OSM ∀" a
   WHERE (tags ->> 'boundary'::text) = 'forest_compartment'::text AND (tags ->> 'name'::text) ~ '^\d+(\.\d+)?$'::text
   ORDER BY ((tags ->> 'name'::text)::smallint);
@@ -60,31 +60,31 @@ COMMENT ON TABLE "Бирюлёвский дендропарк"."∀ WikiMap" IS 
 CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк"."WikiMap ∀"
 TABLESPACE pg_default
 AS WITH json_table AS (
-         SELECT jsonb_array_elements("wmпп".r) AS json
-           FROM "Бирюлёвский дендропарк"."∀ WikiMap" "wmпп"
-        ), geobaze AS (
-         SELECT json_table.json ->> 'pageid'::text AS pageid,
-            json_table.json ->> 'title'::text AS title,
-            st_setsrid(st_point((((json_table.json -> 'coordinates'::text) -> 0) ->> 'lon'::text)::double precision, (((json_table.json -> 'coordinates'::text) -> 0) ->> 'lat'::text)::double precision), 4326) AS "φλ₀",
-            (((json_table.json -> 'coordinates'::text) -> 0) ->> 'bearing'::text)::double precision AS "α₀",
-            (((json_table.json -> 'coordinates'::text) -> 0) ->> 'primary'::text)::boolean AS "f₀",
-            (((json_table.json -> 'coordinates'::text) -> 0) ->> 'cam'::text) IS NOT NULL AS c,
-            st_setsrid(st_point((((json_table.json -> 'coordinates'::text) -> 1) ->> 'lon'::text)::double precision, (((json_table.json -> 'coordinates'::text) -> 1) ->> 'lat'::text)::double precision), 4326) AS "φλ₁",
-            (((json_table.json -> 'coordinates'::text) -> 1) ->> 'bearing'::text)::double precision AS "α₁",
-            (((json_table.json -> 'coordinates'::text) -> 1) ->> 'primary'::text)::boolean AS "f₁",
-            json_table.json ->> 'tag'::text AS tag,
-            json_table.json ->> 'ns'::text AS ns,
-            json_table.json -> 'coordinates'::text AS u,
-            json_table.json -> 'imagedata'::text AS img,
-            'https://commons.wikimedia.org/wiki/' || (json_table.json ->> 'title'::text) AS "URL"
-           FROM json_table
-        )
- SELECT geobaze.*,    
-        st_collect(st_makeline(geobaze."φλ₀", geobaze."φλ₁"),
-        CASE
-            WHEN geobaze."f₀" THEN geobaze."φλ₀"
-            ELSE NULL::geometry
-        END) AS "Vue"
+		 SELECT jsonb_array_elements("wmпп".r) AS json
+		   FROM "Бирюлёвский дендропарк"."∀ WikiMap" "wmпп"
+		), geobaze AS (
+		 SELECT json_table.json ->> 'pageid'::text AS pageid,
+			json_table.json ->> 'title'::text AS title,
+			st_setsrid(st_point((((json_table.json -> 'coordinates'::text) -> 0) ->> 'lon'::text)::double precision, (((json_table.json -> 'coordinates'::text) -> 0) ->> 'lat'::text)::double precision), 4326) AS "φλ₀",
+			(((json_table.json -> 'coordinates'::text) -> 0) ->> 'bearing'::text)::double precision AS "α₀",
+			(((json_table.json -> 'coordinates'::text) -> 0) ->> 'primary'::text)::boolean AS "f₀",
+			(((json_table.json -> 'coordinates'::text) -> 0) ->> 'cam'::text) IS NOT NULL AS c,
+			st_setsrid(st_point((((json_table.json -> 'coordinates'::text) -> 1) ->> 'lon'::text)::double precision, (((json_table.json -> 'coordinates'::text) -> 1) ->> 'lat'::text)::double precision), 4326) AS "φλ₁",
+			(((json_table.json -> 'coordinates'::text) -> 1) ->> 'bearing'::text)::double precision AS "α₁",
+			(((json_table.json -> 'coordinates'::text) -> 1) ->> 'primary'::text)::boolean AS "f₁",
+			json_table.json ->> 'tag'::text AS tag,
+			json_table.json ->> 'ns'::text AS ns,
+			json_table.json -> 'coordinates'::text AS u,
+			json_table.json -> 'imagedata'::text AS img,
+			'https://commons.wikimedia.org/wiki/' || (json_table.json ->> 'title'::text) AS "URL"
+		   FROM json_table
+		)
+ SELECT geobaze.*,	
+		st_collect(st_makeline(geobaze."φλ₀", geobaze."φλ₁"),
+		CASE
+			WHEN geobaze."f₀" THEN geobaze."φλ₀"
+			ELSE NULL::geometry
+		END) AS "Vue"
    FROM geobaze
 WITH DATA;
 
@@ -101,35 +101,36 @@ CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк"."PastVu �
 TABLESPACE pg_default
 AS
 WITH json_table AS (
-         SELECT jsonb_array_elements(p.r -> 'result' ->'photos') AS json,
-                p."isPainting"
-           FROM "Бирюлёвский дендропарк"."∀ PastVu" p
-        ), geobaze AS (
-        select json_table.json ->> 'cid' "№",
-               json_table.json ->> 'title' "Название",
-        	   json_table.json ->> 'dir' "dir",
-        	   st_setsrid(
-        	   	st_point(((json_table.json -> 'geo') ->> 1)::double precision,
-        	   	        ((json_table.json -> 'geo') ->> 0)::double precision), 4326) "φλ₀",
-        	   --json_table.json ->> 'geo' "",
-        	   'https://pastvu.com/_p/a/' || (json_table.json ->> 'file') "URL",
-        	   json_table.json ->> '__v' "v",
-        	   json_table.json ->> 'year' "от",
-        	   json_table.json ->> 'year2' "до",
-        	   "isPainting",
-        	   json_table.json - 'year2' - 'year' - '__v' - 'file' - 'geo' - 'dir' - 'title' - 'cid'  "json"
-          FROM json_table
-          )
+	 SELECT jsonb_array_elements(p.r -> 'result' ->'photos') AS json,
+			p."isPainting"
+	   FROM "Бирюлёвский дендропарк"."∀ PastVu" p
+), geobaze AS (
+	select json_table.json ->> 'cid' "№",
+		   json_table.json ->> 'title' "Название",
+		   json_table.json ->> 'dir' "dir",
+		   st_setsrid(
+		   	st_point(((json_table.json -> 'geo') ->> 1)::double precision,
+		   			((json_table.json -> 'geo') ->> 0)::double precision), 4326) "φλ₀",
+		   --json_table.json ->> 'geo' "",
+		   'https://pastvu.com/_p/a/' || (json_table.json ->> 'file') "URL",
+		   json_table.json ->> '__v' "v",
+		   json_table.json ->> 'year' "от",
+		   json_table.json ->> 'year2' "до",
+		   "isPainting",
+		   json_table.json - 'year2' - 'year' - '__v' - 'file' - 'geo' - 'dir' - 'title' - 'cid'  "json"
+	  FROM json_table
+)
 select * from geobaze
 WITH DATA;
 
+-- Исторические фотографии в границах парка
 CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк"."PastVu парк ∀"
 TABLESPACE pg_default
 as
 SELECT p.*,
-       st_intersection("ог".geom, p."φλ₀") AS geom,
-       st_geometrytype(st_intersection("ог".geom, p."φλ₀")) AS geom_type
+	   st_intersection("ог".geom, p."φλ₀") AS geom,
+	   st_geometrytype(st_intersection("ог".geom, p."φλ₀")) AS geom_type
   FROM "Бирюлёвский дендропарк"."PastVu ∀" p
   JOIN "Бирюлёвский дендропарк"."Основная граница" "ог"
-    ON st_intersects("ог".geom, p."φλ₀")     
+	ON st_contains("ог".geom, p."φλ₀")	 
   WITH DATA;
