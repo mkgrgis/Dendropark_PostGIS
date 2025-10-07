@@ -113,6 +113,7 @@ order by "Уч.", №, "Код";
 
 -- Геометрия кучей и с дублированием
 /*
+
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Маточные площадки"
 AS SELECT a.osm_id,
     a.osm_type,
@@ -143,7 +144,7 @@ AS SELECT a.osm_id,
     a.tags ->> 'ref'::text AS ref_,
     a.tags - 'ref'::text - 'ref:start_date'::text - 'taxon'::text - 'taxon:ru'::text - 'genus'::text - 'genus:ru'::text - 'source:taxon'::text - 'natural'::text - 'leaf_cycle'::text - 'leaf_type'::text - 'start_date'::text - 'note'::text - 'description'::text - 'fixme'::text AS tags
    FROM "Бирюлёвский дендропарк"."OSM ∀" a
-     LEFT JOIN "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+     LEFT JOIN "Бирюлёвский дендропарк"."Участки" u ON st_within(a.geom, u.geom)
   WHERE (a.tags ->> 'ref'::text) IS NOT NULL AND ((a.tags ->> 'barrier'::text) IS NULL OR (a.tags ->> 'barrier'::text) <> 'gate'::text) AND (((a.tags ->> 'natural'::text) = ANY (ARRAY['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) OR (a.tags ->> 'barrier'::text) = 'hedge'::text)
   ORDER BY u."№", ((regexp_matches(a.tags ->> 'ref'::text, '\d+'::text))[1]::smallint);
 */

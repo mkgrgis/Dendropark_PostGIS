@@ -1,81 +1,9 @@
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Видовые таблички по OSM"
-AS SELECT a.osm_id,
-    a.osm_type,
-    a.geom,
-    u."№" AS "Уч.",
-    a.tags ->> 'name'::text AS "название",
-    a.tags ->> 'taxon'::text AS taxon,
-    a.tags ->> 'taxon:ru'::text AS "вид",
-    a.tags ->> 'genus'::text AS genus,
-    a.tags ->> 'genus:ru'::text AS "род",
-    a.tags ->> 'source:taxon'::text AS "подтв вида",
-    a.tags ->> 'start_date'::text AS "создано",
-    a.tags ->> 'note'::text AS "заметки",
-    a.tags ->> 'description'::text AS "описание",
-    a.tags - 'name'::text - 'tourism'::text - 'information'::text - 'board_type'::text - 'taxon'::text - 'taxon:ru'::text - 'genus'::text - 'genus:ru'::text - 'start_date'::text - 'note'::text AS tags
-   FROM "Бирюлёвский дендропарк"."OSM ∀" a
-     LEFT JOIN "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
-  WHERE (a.tags ->> 'tourism'::text) = 'information'::text AND (a.tags ->> 'information'::text) = 'board'::text AND (a.tags ->> 'board_type'::text) = 'plants'::text
-  ORDER BY u."№";  
 
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Видовые таблички по WikiMAp"
-AS SELECT "WikiMap ∀".pageid,
-    "WikiMap ∀".title,
-    "WikiMap ∀"."φλ₀",
-    "WikiMap ∀"."α₀",
-    "WikiMap ∀"."f₀",
-    "WikiMap ∀".c,
-    "WikiMap ∀"."φλ₁",
-    "WikiMap ∀"."α₁",
-    "WikiMap ∀"."f₁",
-    "WikiMap ∀".tag,
-    "WikiMap ∀".ns,
-    "WikiMap ∀".u,
-    "WikiMap ∀".img,
-    "WikiMap ∀"."URL",
-    "WikiMap ∀"."Vue",
-    (regexp_match("WikiMap ∀".title, '(?<=^File\:Табличка «).+?(?=»)'::text))[1] AS "Название",
-    (regexp_match("WikiMap ∀".title, '(?<=на участке )\d+(?=[ \.])'::text))[1]::smallint AS "Уч. назв",
-    u₀."№" AS "Уч.φλ₀",
-    u₁."№" AS "Уч.φλ₁",
-    COALESCE("WikiMap ∀"."φλ₁", "WikiMap ∀"."φλ₀") AS "φλ"
-   FROM "Бирюлёвский дендропарк"."WikiMap ∀"
-     LEFT JOIN "Бирюлёвский дендропарк"."Участки" u₀ ON st_intersects(u₀.geom, "WikiMap ∀"."φλ₀")
-     LEFT JOIN "Бирюлёвский дендропарк"."Участки" u₁ ON st_intersects(u₁.geom, "WikiMap ∀"."φλ₁")
-  WHERE "WikiMap ∀".title ~ '^File\:Табличка'::text;
 
 
 -- Сверка видового состава
 
-create view "Бирюлёвский дендропарк"."Виды по OSM" as
-with виды as (
-select distinct 
-	m.*,
-	unnest(string_to_array(a.tags ->> 'taxon'::text, ';'::text)) AS taxon,
-    coalesce(cardinality(string_to_array(a.tags ->> 'taxon'::text, ';'::text)),
-             cardinality(string_to_array(a.tags ->> 'genus'::text, ';'::text))) AS "видов на посадке",
-    unnest(string_to_array(a.tags ->> 'taxon:ru'::text, ';'::text)) AS "вид",
-    unnest(string_to_array(a.tags ->> 'genus'::text, ';'::text)) AS genus,
-    unnest(string_to_array(a.tags ->> 'genus:ru'::text, ';'::text)) AS "род"
-   from "Бирюлёвский дендропарк"."OSM ∀" a 
-   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
-   left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
-     on m."Уч." =  u."№"
-    and m."Код" = a.tags ->> 'ref'
-   where (a.tags ->> 'ref'::text) is not null
-     and ((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
-     and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
-order by "Уч.", №, "Код"
-)
-select distinct
-       "Уч.", "Код", №, id,
-	   coalesce(taxon, genus) taxon,
-       "видов на посадке",
-       coalesce(вид, род) вид,
-       coalesce(genus, regexp_substr(taxon, '^\S+\s')) genus,
-       coalesce(род, regexp_substr(вид, '^\S+\s')) род
-from виды
-order by "Уч.", №, "Код";
+
 
 create view "Бирюлёвский дендропарк"."Виды по сверке Дмитрия" as
 -- Регулярный вид
@@ -154,7 +82,7 @@ select  distinct
     a.tags ->> 'fixme'::text AS "Исправить",
     (a.tags ->> 'was:taxon'::text) IS NOT NULL AS "Вырублен"  
    from "Бирюлёвский дендропарк"."OSM ∀" a 
-   left join "Бирюлёвский дендропарк"."Участки" u ON st_intersects(u.geom, a.geom)
+   left join "Бирюлёвский дендропарк"."Участки" u ON st_within(a.geom, u.geom)
    left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
      on m."Уч." =  u."№"
     and m."Код" = a.tags ->> 'ref'
