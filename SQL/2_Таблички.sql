@@ -56,7 +56,9 @@ SET http.curlopt_timeout_msec = 200000;
 -- Получение данных без промежуточных утилит
 refresh materialized view "Бирюлёвский дендропарк"."Wikimap curl";
 
--- 123 
+select * from "Бирюлёвский дендропарк".wiki_таблички;
+
+-- 140
 select round(ST_Distance(w.φλ::geography, o.geom::geography)::numeric, 1) d,
        lower(w."Название") ~ lower(o.род) n,
        *  
@@ -66,7 +68,7 @@ select round(ST_Distance(w.φλ::geography, o.geom::geography)::numeric, 1) d,
     on w.title = o.tags ->> 'wikimedia_commons' 
    
        
--- 12 = 9 нехватка + 3 мусорные объекты       
+-- 3 мусорных объекта     
 select 'https://openstreetmap.org/'|| osm_type || '/' || osm_id "URL",
        o."Уч.", название, o.taxon   
   from "Бирюлёвский дендропарк"."Таблички маточных площадок OSM" o
@@ -81,9 +83,7 @@ select pageid, "URL", title "Название"
   full outer 
  join "Бирюлёвский дендропарк"."Таблички маточных площадок Wiki" w
     on w.title = o.tags ->> 'wikimedia_commons'
-where o.osm_id is null
+where o.osm_id is null;
 
-
-
-File:Табличка «Сосна Банкса» на участке 3 Бирюлёвского дендрария.jpg
+-- Все OSM объекты табличек 2020 года имеют привязку фотографии с ВикиСклада.
 

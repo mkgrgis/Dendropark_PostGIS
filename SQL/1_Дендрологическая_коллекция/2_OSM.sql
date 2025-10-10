@@ -19,7 +19,7 @@ select distinct
   from уч a   
  where (a.tags ->> 'ref:start_date') is not null -- обозначение датировано, либо
 	or ((a.tags ->> 'ref') is not null -- обозначение есть и
-		and ((a.tags ->> 'natural') = any (array['wood', 'scrub', 'tree_row', 'tree', 'shurb'])
+		and ((a.tags ->> 'natural') = any (array['wood', 'scrub', 'tree_row', 'tree', 'shrub'])
 			 or (a.tags ->> 'barrier') = 'hedge'
 			) -- деревья или кусты или куст или посадка-линия или живая изгородь и при этом
 		and (
@@ -36,11 +36,12 @@ select "Уч.",
 	   osm_type,
 	   osm_id,
 	   'https://openstreetmap.org/'|| osm_type || '/' || osm_id "URL",
-	   tags - 'ref' t
+	   tags - 'ref' t,
+	   tags ->> 'old_ref' ref0
   from ref
 order by "Уч." asc, "№" asc, ref asc
 )
-select row_number() over ()::int2 "id",
+select row_number() over ()::int2 "№ п/п",
 	   *
   from маточные_площадки;
 
@@ -76,7 +77,7 @@ select distinct
   from уч a   
  where (a.tags ->> 'ref:start_date') is not null -- обозначение датировано, либо
 	or ((a.tags ->> 'ref') is not null -- обозначение есть и
-		and ((a.tags ->> 'natural') = any (array['wood', 'scrub', 'tree_row', 'tree', 'shurb'])
+		and ((a.tags ->> 'natural') = any (array['wood', 'scrub', 'tree_row', 'tree', 'shrub'])
 			 or (a.tags ->> 'barrier') = 'hedge'
 			) -- деревья или кусты или куст или посадка-линия или живая изгородь и при этом
 		and (

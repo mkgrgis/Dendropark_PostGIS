@@ -6,7 +6,8 @@ r=$(echo "select '+';" | psql -A -t -q "$pgurl");
 [ "$r" != "+" ] && echo "$r" && echo "✘ PostgreSQL URL ??? $pgurl" && exit;
 
 bbox="$1";
-apiadr="https://overpass-api.de/api/interpreter?data=";
+#apiadr="https://overpass-api.de/api/interpreter?data=";
+apiadr="https://overpass.openstreetmap.fr/api/interpreter?data=";
 apiadr="$apiadr[out:xml];(++node($bbox);<;);(._;>;);out+meta;";
 echo "$apiadr";
 s=$(date '+%s');
