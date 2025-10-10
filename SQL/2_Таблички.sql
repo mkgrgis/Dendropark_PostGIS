@@ -56,7 +56,7 @@ SET http.curlopt_timeout_msec = 200000;
 -- Получение данных без промежуточных утилит
 refresh materialized view "Бирюлёвский дендропарк"."Wikimap curl";
 
--- 123 
+-- 140
 select round(ST_Distance(w.φλ::geography, o.geom::geography)::numeric, 1) d,
        lower(w."Название") ~ lower(o.род) n,
        *  
@@ -66,7 +66,7 @@ select round(ST_Distance(w.φλ::geography, o.geom::geography)::numeric, 1) d,
     on w.title = o.tags ->> 'wikimedia_commons' 
    
        
--- 12 = 9 нехватка + 3 мусорные объекты       
+-- 3 мусорныü объектf       
 select 'https://openstreetmap.org/'|| osm_type || '/' || osm_id "URL",
        o."Уч.", название, o.taxon   
   from "Бирюлёвский дендропарк"."Таблички маточных площадок OSM" o
