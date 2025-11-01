@@ -56,7 +56,26 @@ SET http.curlopt_timeout_msec = 200000;
 -- Получение данных без промежуточных утилит
 refresh materialized view "Бирюлёвский дендропарк"."Wikimap curl";
 
-select * from "Бирюлёвский дендропарк".wiki_таблички;
+select * from "Бирюлёвский дендропарк".wiki_таблички w
+full join (select e."Табличка", coalesce(s."Адрес", split_part(e."Адрес", '
+', 1)) "Адрес", e."Сохранны", e."Утрачено"
+  from "Бирюлёвский дендропарк"."Экспликация от Дмитрия" e
+  left join ( -- Доопределение старых обозначений маточных площадок, Дмитрий таких сведений не публикует
+    select "Адрес",
+           split_part("Адрес", '(', 1) "Сокр"
+      from "Бирюлёвский дендропарк"."№№ пл. по паспорту ОКН" o
+     where o."Адрес" ~'\('
+            ) s
+     on s."Сокр" = e."Адрес" ) e
+using("Адрес")
+where "Адрес" is not null and (e."Табличка" is not null or w."Изображение" is not null)
+order by regexp_substr("Адрес"::text, '^\d+'::text)::smallint asc,
+       regexp_substr("Адрес"::text, '(?<=×.?)\d+'::text)::smallint asc;
+
+select e.* from "Бирюлёвский дендропарк"."Экспликация от Дмитрия" e
+left join "Бирюлёвский дендропарк".wiki_таблички w
+using("Адрес")
+where w."Изображение" is null and e."Табличка" != ''
 
 -- 140
 select round(ST_Distance(w.φλ::geography, o.geom::geography)::numeric, 1) d,

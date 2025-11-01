@@ -107,7 +107,7 @@ select case when a[1] ~ '×' then split_part(split_part(a[1], '&', 1), '
 ', 1)::text else null end "Адрес",
        case when a[1] ~ '×' then split_part(a[1], '×', 1)::int2 else null end  "Уч.",
        case when a[1] ~ '×' then regexp_substr(a[1], '(?<=×)\d+')::int2 else null end "№",
-       case when a[1] !~ '×' then a[1] else null end "Обсадка",
+       case when a[1] !~ '×' then a[1] else null end "Указание на аллею",
        split_part(split_part(split_part(a[1], '×', 2), '&', 1), '
 ', 1) "№_",
        a[2] "Изображение",
