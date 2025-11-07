@@ -29,28 +29,7 @@ select "OSM",
 from b
 order by "Уч." asc, "№", "№доп";
 
-create view "Бирюлёвский дендропарк"."Виды по паспорту ОКН" as
-with b as (
-select m."Уч.",
-       split_part(m."№", '(', 1)::int2 "№",
-       split_part(m."№", '(', 2) "№+",
-       m.t like '%трачен%' "Утрата",
-       regexp_replace(m.t, '^(У|у)трачен[аоы]?\:?\s', '') t
-  from "Бирюлёвский дендропарк"."ОписьИзПредмОхрОКН" m
-),
-c as  (
- select "Уч.",
-        "№",
-        case when split_part("№+", ')', 1) = '' then NULL
-             else split_part("№+", ')', 1)
-         end ::varchar(3) "спец №",
-        "Утрата",
-        cardinality(regexp_split_to_array(t, ',\s?'))::int2 "Видов на площадке",
-        unnest(regexp_split_to_array(t, ',\s?')) "Вид или род"
- from b
-)
-select "Уч.", "№", "Утрата", "Видов на площадке", "Вид или род"
-from c;
+
 
 -- Сводка по совпадению рода
 select s."Уч.", s."№", o.*, d.*, p.*
@@ -66,6 +45,7 @@ order by s."Уч." asc, s."№", "Код";
 
 -- Данные OSM с массивами
 create view "Бирюлёвский дендропарк"."OSM посадки растений" as
+
 select  distinct 
 	m.*,
     (string_to_array(a.tags ->> 'taxon'::text, ';'::text)) AS taxon,
@@ -83,10 +63,10 @@ select  distinct
     (a.tags ->> 'was:taxon'::text) IS NOT NULL AS "Вырублен"  
    from "Бирюлёвский дендропарк"."OSM ∀" a 
    left join "Бирюлёвский дендропарк"."Участки" u ON st_within(a.geom, u.geom)
-   left join "Бирюлёвский дендропарк"."№ площадок по ОСМ" m
+   left join "Бирюлёвский дендропарк"."№№ пл. по ОСМ" m
      on m."Уч." =  u."№"
-    and m."Код" = a.tags ->> 'ref'
+    and m."№"::text  = a.tags ->> 'ref'
    where (a.tags ->> 'ref'::text) is not null
      and ((a.tags ->> 'barrier') is null or (a.tags ->> 'barrier'::text) <> 'gate'::text)
      and (((a.tags ->> 'natural'::text) = any (array['wood'::text, 'scrub'::text, 'tree_row'::text, 'tree'::text])) or (a.tags ->> 'barrier'::text) = 'hedge'::text)
-order by "Уч.", №, "Код";
+order by "Уч.", №;
