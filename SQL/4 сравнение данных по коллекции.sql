@@ -1,34 +1,63 @@
-
-
-
 -- Сверка видового состава
 
-
-
-create view "Бирюлёвский дендропарк"."Виды по сверке Дмитрия" as
--- Регулярный вид
-with b as (
-select "Адрес" ~ '\*' "OSM",
-       "Адрес" !~ '\*' "План 1978",
-       split_part("Адрес", '×', 1)::int2 "Уч.",
-       regexp_substr(replace(split_part("Адрес", '×', 2), '*', ''), '^\d+')::int2 "№",
-       split_part("Адрес", '×', 3) "№доп",
-       "Флаг",
-       unnest(regexp_split_to_array(mp."Растения", ';\s?')) "Вид или род"
-from "Бирюлёвский дендропарк"."МП сверка Дмитрия" mp
+create or replace view "Бирюлёвский дендропарк"."Виды Дм сохр + ОКН" as
+-- Совпадение сохранных видов и родов на маточных площадках
+with d as (
+select regexp_substr("Адрес", '^\d+'::text)::smallint AS "Уч.",
+    regexp_substr("Адрес", '(?<=×)\d+'::text)::smallint AS "№",
+    *,
+    true "Экспликация"
+  from "Бирюлёвский дендропарк"."Экспликация от Дмитрия сохр"
+),
+p as (
+select regexp_substr("Адрес", '^\d+'::text)::smallint AS "Уч.",
+    regexp_substr("Адрес", '(?<=×)\d+'::text)::smallint AS "№",
+    "Адрес" "Адрес пасп",
+    "Вид или род",
+    true "Паспорт"
+   FROM "Бирюлёвский дендропарк".wiki_флора wф 
 )
-select "OSM",
-       "План 1978",
-       "Уч.",
-       "№",
-       "№доп",
-       "Флаг",
-       regexp_replace("Вид или род", '\^|\*', '') "Вид или род",
-       "Вид или род" ~ '\*' "Утрата",
-       "Вид или род" ~ '\^' "После 2020"
-from b
-order by "Уч." asc, "№", "№доп";
+select *
+from d
+full outer join p
+using ("Уч.", "№", "Вид или род")
+order by "Уч." asc, "№" asc;
 
+-- 324
+select count (*) n from "Бирюлёвский дендропарк"."Виды Дм сохр + ОКН"
+where "Паспорт" and "Экспликация";
+-- 428
+select count (*) n from "Бирюлёвский дендропарк"."Виды Дм сохр + ОКН"
+where "Паспорт" is null or "Экспликация" is null;
+
+select * from "Бирюлёвский дендропарк"."Виды Дм сохр + ОКН"
+where "Паспорт" is null or "Экспликация" is null;
+
+
+with d as (
+select split_part("Адрес"::text, '
+'::text, 1) AS "Адрес эксп",
+       regexp_substr("Адрес"::text, '^\d+'::text)::smallint AS "Уч.",
+       regexp_substr("Адрес"::text, '(?<=×.?)\d+'::text)::smallint AS "№",
+       regexp_substr("Адрес"::text, '(?<=×).+'::text) AS "№_",
+       unnest(string_to_array("Утрачено", '
+')) "Вид или род",
+true "Экспликация"
+  from "Бирюлёвский дендропарк"."Экспликация от Дмитрия"
+),
+p as (
+select regexp_substr("Адрес", '^\d+'::text)::smallint AS "Уч.",
+    regexp_substr("Адрес", '(?<=×)\d+'::text)::smallint AS "№",
+    "Адрес" "Адрес пасп",
+    "Вид или род",
+    true "Паспорт"
+   FROM "Бирюлёвский дендропарк".wiki_флора 
+)
+select *
+from d
+full outer join p
+using ("Уч.", "№", "Вид или род")
+order by "Уч." asc, "№" asc;
 
 
 -- Сводка по совпадению рода

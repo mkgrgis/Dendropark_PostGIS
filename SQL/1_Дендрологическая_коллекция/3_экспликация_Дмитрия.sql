@@ -81,7 +81,7 @@ select д."Адрес", unnest(string_to_array(д."Сохранны", '
 from "Бирюлёвский дендропарк"."Экспликация от Дмитрия доп" д
 )
 select "Адрес",
-       regexp_substr(c, '[^\(\[]+') "Вид или род",
+       trim(regexp_substr(c, '[^\(\[]+')) "Вид или род",
        regexp_substr(c, '(?<=\[)[^\]]+(?=\])') "Табличка",
        regexp_substr(c, '(?<=\()[^\)]+(?=\))') "Примечание"
 from полные_строки;
@@ -121,54 +121,3 @@ select "Адрес",
        regexp_substr(c, '(?<=\[)[^\]]+(?=\])') "Табличка",
        regexp_substr(c, '(?<=\()[^\)]+(?=\))') "Примечание"
 from полные_строки;
-
--- Совпадение видов и родов на маточных площадках
-with d as (
-select split_part("Адрес"::text, '
-'::text, 1) AS "Адрес эксп",
-       regexp_substr("Адрес"::text, '^\d+'::text)::smallint AS "Уч.",
-       regexp_substr("Адрес"::text, '(?<=×.?)\d+'::text)::smallint AS "№",
-       regexp_substr("Адрес"::text, '(?<=×).+'::text) AS "№_",
-       unnest(string_to_array("Сохранны", '
-')) "Род или вид",
-true "Экспликация"
-  from "Бирюлёвский дендропарк"."Экспликация от Дмитрия"
-),
-p as (
-select regexp_substr("Адрес", '^\d+'::text)::smallint AS "Уч.",
-    regexp_substr("Адрес", '(?<=×)\d+'::text)::smallint AS "№",
-    "Адрес" "Адрес пасп",
-    "Род или вид",
-    true "Паспорт"
-   FROM "Бирюлёвский дендропарк".wiki_флора wф 
-)
-select *
-from d
-full outer join p
-using ("Уч.", "№", "Род или вид")
-order by "Уч." asc, "№" asc
-
-with d as (
-select split_part("Адрес"::text, '
-'::text, 1) AS "Адрес эксп",
-       regexp_substr("Адрес"::text, '^\d+'::text)::smallint AS "Уч.",
-       regexp_substr("Адрес"::text, '(?<=×.?)\d+'::text)::smallint AS "№",
-       regexp_substr("Адрес"::text, '(?<=×).+'::text) AS "№_",
-       unnest(string_to_array("Утрачено", '
-')) "Род или вид",
-true "Экспликация"
-  from "Бирюлёвский дендропарк"."Экспликация от Дмитрия"
-),
-p as (
-select regexp_substr("Адрес", '^\d+'::text)::smallint AS "Уч.",
-    regexp_substr("Адрес", '(?<=×)\d+'::text)::smallint AS "№",
-    "Адрес" "Адрес пасп",
-    "Род или вид",
-    true "Паспорт"
-   FROM "Бирюлёвский дендропарк".wiki_флора 
-)
-select *
-from d
-full outer join p
-using ("Уч.", "№", "Род или вид")
-order by "Уч." asc, "№" asc;
