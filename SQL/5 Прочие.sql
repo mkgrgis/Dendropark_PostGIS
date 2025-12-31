@@ -1,3 +1,73 @@
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Ценные видовые раскрытия" as
+with b as (
+select (tags ->> 'ref')::int2 "№",
+(tags ->> 'name') "Название",
+(tags ->> 'direction') α,
+geom,
+osm_type,
+osm_id
+FROM "Бирюлёвский дендропарк"."OSM ∀" a
+  WHERE (tags ->> 'tourism') = 'viewpoint'
+order by "№" nulls last
+)
+select geom, "№", "Название", α,
+case when α ~ '^\d+\-\d+$'
+     then (regexp_substr(α, '^\d+')::int2 + regexp_substr(α, '\d+$')::int2) / 2.0
+     when α ~ '^\d+$'
+     then α::float
+     end ::float α₀,
+     osm_type,
+     osm_id
+from b;
+
+-- Формирователь реляционного табличного вида описи дендрологической коллекции
+create materialized view "Бирюлёвский дендропарк"."wiki_Ценные видовые раскрытия" as
+with s_agg as ( -- Слияние всех полученных текстовых данных
+select string_agg(content, '
+') t,
+'(?<=\=\= Ценные видовые раскрытия \=\=).+== ' as filter
+from "Бирюлёвский дендропарк".wiki_wget
+), 
+floral_t as ( -- Ракрывающаяся таблица в разделе «Флора»
+select (regexp_match(t,  filter))[1] t 
+from s_agg
+)
+,
+tab_okn as ( -- Вложенная таблица из паспорта ОКН
+select (regexp_match(t,  '(?<={\|)[\s\S]+(?=\|})'))[1] t
+from floral_t
+),
+wiki_tab as ( -- Пропускаем заголовок, читаем после «|-» с новой строки
+select (regexp_matches(t,  '(?<=\|\-
+\|).+'))[1] t
+from tab_okn
+),
+cortage as ( -- Переводим строки вики-разметки в набор строк
+select regexp_split_to_table(t, '
+\|\-
+\|') c
+from wiki_tab
+),
+arr as ( -- В каждой строке массив ячеек
+select regexp_split_to_array(c, '
+\|') a
+from cortage
+)
+select a[1]::int2 "№",
+       a[2] "Название",
+       split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 1) "OSM точка",
+       a[4] α,
+       a[5]::float α₀
+from arr;
+
+select *,
+w.α = o.α "α=",
+w.α₀ = o.α₀ "α₀=",
+w."Название" = o."Название" "название="
+from "Бирюлёвский дендропарк"."wiki_Ценные видовые раскрытия" w
+full join "Бирюлёвский дендропарк"."Ценные видовые раскрытия" o
+using ("№")
+
 -- "Бирюлёвский дендропарк"."ДТС" исходный текст
 
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."ДТС"
