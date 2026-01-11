@@ -1,6 +1,7 @@
 create foreign table "Бирюлёвский дендропарк"."Экспликация от Дмитрия wget" (
     "Адрес" varchar null,
     "Сохранны" varchar null, -- Растительность по экспликациям 1978/2016 гг., подтверждённая,
+    "Ведомость 1965 года" varchar null, -- Растительность по ведомости 1965 года,
     "Утрачено" varchar null, -- Растительность по экспликации 1978, исчезнувшая к 2016 г.,
     "Новая" varchar null, -- Растительность, высаженная в 2017-2019 гг., либо выявленная после 2005 г.,
     "Обсадка" varchar null
@@ -10,6 +11,24 @@ cd /tmp/exp;
 wget https://moscowparks.narod.ru/docs/explication.ods >/dev/null;
 libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":44,34,UTF8,1,,0,false,true,false,false,false,-1 /tmp/exp/explication.ods > /dev/null;
 cat explication-Лист1.csv;
+', format 'csv', header 'true');
+
+-- drop foreign table "Бирюлёвский дендропарк"."ДТС от Дмитрия wget";
+create foreign table "Бирюлёвский дендропарк"."ДТС от Дмитрия wget" (
+ 	"Название по OSM" varchar null, -- [примечания для участка]
+    "Название из пр. устр. 1964-1965 гг." varchar null,
+    "Длина аллеи, м., до 10м" varchar null, -- (по проекту)
+    "Формирующий вид" varchar null, -- (примечание)
+    "Годы посадок" varchar null, --(количество)
+    "Количество по ведом. 1965 г." varchar null, --(прим.),
+    "Наличие комп. пос. 2018 г." varchar null,
+    "Кустарник-бордюр" varchar NULL -- (наличие) [годы посадки]
+) server "Wiki дендропарк"
+options ( program  'mkdir /tmp/exp;
+cd /tmp/exp;
+wget https://moscowparks.narod.ru/docs/explication.ods >/dev/null;
+libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":44,34,UTF8,1,,0,false,true,false,false,false,-1 /tmp/exp/explication.ods > /dev/null;
+cat explication-Лист2.csv;
 ', format 'csv', header 'true');
 
 create materialized view "Бирюлёвский дендропарк"."Экспликация от Дмитрия" as
