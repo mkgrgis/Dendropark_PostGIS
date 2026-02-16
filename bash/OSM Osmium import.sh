@@ -1,6 +1,6 @@
 #!/bin/bash
 # Обновление данных в PostGIS по блоку скачиваемых данных
-[ ! -f 'postgres.url' ] && echo "✘ postgres.url" && exit;
+[ ! -f 'postgres.url' ] && [ -z "$PGPASSWORD" ] echo "✘ postgres.url" && exit;
 pgurl=$(cat 'postgres.url');
 r=$(echo "select '+';" | psql -A -t -q "$pgurl");
 [ "$r" != "+" ] && echo "$r" && echo "✘ PostgreSQL URL ??? $pgurl" && exit;
