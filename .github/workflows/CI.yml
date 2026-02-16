@@ -27,7 +27,7 @@ jobs:
       - name: Установка PostgreSQL, библиотек для компиляции утилиты, местных стандартов вывода
         run: |
           sudo apt install -y apt-transport-https
-          sudo apt install postgresql postgresql-contrib postgis -y
+          sudo apt install postgresql postgresql-contrib postgis osmium-tool -y
           sudo apt install language-pack-ru-base language-pack-ru -y && sudo locale-gen ru_RU
           sudo systemctl restart postgresql;
 
