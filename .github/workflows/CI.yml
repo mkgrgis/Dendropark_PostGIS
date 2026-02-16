@@ -1,0 +1,50 @@
+name: Dendoparque
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  test:
+    env:
+      PGPASSWORD : '1234567890'
+      PGDATABASE : 'Дендропарк'
+      PGUSER : 'Географ'
+      PGPORT : '5432'
+      PGHOST : '127.0.0.1'
+      test_schema : 'data'
+
+    name: Разворачивание PostgreSQL, загрузка данных
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: tar
+        run: |
+          chmod +x ./test/*.sh -v
+
+      - name: Установка PostgreSQL, библиотек для компиляции утилиты, местных стандартов вывода
+        run: |
+          sudo apt install -y apt-transport-https
+          sudo apt install postgresql postgresql-contrib postgis -y
+          sudo apt install language-pack-ru-base language-pack-ru -y && sudo locale-gen ru_RU
+          sudo systemctl restart postgresql;
+
+      - name: Подготовка пользователя и БД PostgreSQL
+        run: bash test/db_init.sh '${{ env.PGDATABASE }}' '${{ env.PGUSER }}' '${{ env.PGPASSWORD }}';
+
+      - name: Загрузка данных
+        run: bash test/load.sh ${{ env.test_schema }};
+      
+      - name: Проверка итогового запроса
+        run: bash test/control.sh ${{ env.test_schema }}
+
+      - name: Скачивание артефактов провала для анализа
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Diff_schema_${{ env.test_schema }}
+          path: |
+            test/
+          retention-days: 4
