@@ -15,7 +15,7 @@ libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":44,34,UTF8
 cat explication-Лист1.csv;
 ', format 'csv', header 'true');
 
--- drop foreign table "Бирюлёвский дендропарк: Дмитрий"."ДТС wget";
+-- drop foreign table "Бирюлёвский дендропарк: Дмитрий"."ДТС wget" cascade;
 create foreign table "Бирюлёвский дендропарк: Дмитрий"."ДТС wget" (
  	"Название по OSM" varchar null, -- [примечания для участка]
     "Название из пр. устр. 1964-1965 гг." varchar null,
@@ -24,7 +24,8 @@ create foreign table "Бирюлёвский дендропарк: Дмитри�
     "Годы посадок" varchar null, --(количество)
     "Количество по ведом. 1965 г." varchar null, --(прим.),
     "Наличие комп. пос. 2018 г." varchar null,
-    "Кустарник-бордюр" varchar NULL -- (наличие) [годы посадки]
+    "Кустарник-бордюр" varchar NULL, -- (наличие) [годы посадки]
+    "Wikidata" varchar NULL
 ) server "Wiki дендропарк"
 options ( program  'mkdir /tmp/exp;
 cd /tmp/exp;

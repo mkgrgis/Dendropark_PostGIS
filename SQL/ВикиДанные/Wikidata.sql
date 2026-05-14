@@ -1,22 +1,25 @@
 create schema "Бирюлёвский дендропарк: WikiData";
 
+drop materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть";
 create materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть" as
 with wikidata_json as (
 select
   (http_get(
     'https://query.wikidata.org/sparql?query=' || 
     urlencode(
-      'SELECT ?картинка ?элемент ?элементLabel ?типДорогиLabel ?№ ?Категория
-WHERE {
-  ?элемент wdt:P361 wd:Q4087179 ; p:P361 ?stn. # Бирюлёвский дендропарк     
-  OPTIONAL { ?stn pq:P1545 ?№. }               # порядковый номер его части (из паспорта ОКН)
-  OPTIONAL { ?элемент wdt:P373 ?Категория. }   # категория ВикиСклада
-  ?элемент wdt:P31 ?типДороги.                 # тип объекта
-  ?типДороги wdt:P279* ?родитель.
+      'SELECT ?картинка ?элемент ?элементLabel ?типДорогиLabel ?№ ?Категория ?основательLabel ?дата_основания WHERE {
+  ?элемент wdt:P361 wd:Q4087179;
+    p:P361 ?stn.
+  OPTIONAL { ?stn pq:P1545 ?№. }
+  OPTIONAL { ?элемент wdt:P373 ?Категория. }
+  ?элемент wdt:P31 ?типДороги.
+  OPTIONAL { ?элемент wdt:P112 ?основатель. }
+  OPTIONAL { ?элемент wdt:P580 ?дата_основания. }
+  ?типДороги (wdt:P279*) ?родитель.
   OPTIONAL { ?элемент wdt:P18 ?картинка. }
-  FILTER (?родитель IN (wd:Q34442, wd:Q5004679, wd:Q174782)) . # тип объекта восходит к дорогам, тропам или площадям
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru" . }
-} '
+  FILTER(?родитель IN(wd:Q34442, wd:Q5004679, wd:Q174782))
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
+}'
     ) ||
     '&format=json'
   )).content::json -> 'results' -> 'bindings' j_r
@@ -32,7 +35,9 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Q",
        (j -> '№' ->> 'value')::semver "№",
        j -> 'Категория' ->> 'value' "Категория",
        j -> 'картинка' ->> 'value' "Изображение",
-       j -> 'элемент' ->> 'value' "wikidata"
+       j -> 'элемент' ->> 'value' "wikidata",
+       j -> 'основательLabel' ->> 'value' "Основатель",
+       j -> 'дата_основания' ->> 'value' "Дата основания"
 from element
 order by "№", "название";
 
