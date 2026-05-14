@@ -66,7 +66,9 @@ from arr;
 -- Список номеров маточных площадок
 create view "Бирюлёвский дендропарк: Википедия"."№№ пл. по Википедии" as
 select distinct regexp_substr("Адрес", '^\d+')::int2 "Уч.",
-       regexp_substr("Адрес", '(?<=×)\d+')::int2 "№",
+       regexp_substr("Адрес", '(?<=×)\d+')::int2 "№ ОКН",
+       regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))')::int2 "№",
+       regexp_substr("Адрес", '(?<=×\d+\().+') ~ '’' "штрих",
        "Адрес"
 from "Бирюлёвский дендропарк: Википедия"."Флора"
 order by "Уч." asc, "№" asc;
@@ -129,7 +131,7 @@ with s_agg as ( -- Слияние всех полученных текстовы
 select string_agg(content, '
 ') t,
 '(?<=== Ценные видовые раскрытия ==)(.*?)(?=\|})' as filter
-from "Бирюлёвский дендропарк: Википедия".wiki_wget
+from "Бирюлёвский дендропарк: Википедия".wget
 ), 
 cwr_t as ( -- Ракрывающаяся таблица в разделе «Ценные видовые раскрытия»
 select (regexp_match(t,  filter))[1] t 
@@ -148,7 +150,7 @@ cortage as ( -- Переводим строки вики-разметки в н�
 select regexp_split_to_table(t, '
 \|\-
 \|') c
-from tab
+from wiki_tab
 ),
 arr as ( -- В каждой строке массив ячеек
 select regexp_split_to_array(c, '
