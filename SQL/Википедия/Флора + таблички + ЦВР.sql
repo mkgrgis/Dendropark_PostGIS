@@ -170,8 +170,7 @@ from arr;
 
 -- Формирователь реляционного табличного вида
 -- списка аллей
-create materialized view "Бирюлёвский дендропарк: Википедия".аллеи as
-
+create materialized view "Бирюлёвский дендропарк: Википедия"."Аллеи" as
 with s_agg as ( -- Слияние всех полученных текстовых данных
 select string_agg(content, '
 ') t,
