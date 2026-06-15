@@ -15,9 +15,9 @@ select
   ?элемент wdt:P31 ?типДороги.
   OPTIONAL { ?элемент wdt:P112 ?основатель. }
   OPTIONAL { ?элемент wdt:P580 ?дата_основания. }
-  ?типДороги (wdt:P279*) ?родитель.
   OPTIONAL { ?элемент wdt:P18 ?картинка. }
-  FILTER(?родитель IN(wd:Q34442, wd:Q5004679, wd:Q174782))
+  ?типДороги (wdt:P279*) ?родитель.  
+  FILTER(?родитель IN(wd:Q34442, wd:Q5004679, wd:Q174782, wd:Q3352369))
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
 }'
     ) ||

@@ -1,6 +1,7 @@
 -- Данные из экспликации Дмитрия: ДТС + дороги
 
-create materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС" as
+drop view  "Бирюлёвский дендропарк: Дмитрий"."ДТС группы";
+create view "Бирюлёвский дендропарк: Дмитрий"."ДТС группы" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
        atx,
@@ -10,6 +11,28 @@ select max("Время") over (partition by url) mt, "Время",
    and "№ листа" = 2
 )
 select "№ строки",
+       coalesce(lead("№ строки") OVER (ORDER BY "№ строки"), 32768) AS "до",
+       lower(atx[1]) "Группа",
+       row_number() over () "№"
+  from b
+ where "Время" = mt -- По самому позднему из сохранённых файлов
+   and "№ строки" > 1
+   and atx[1] != ''
+   and atx[1] = upper(atx[1])
+ order by "№ строки";
+
+-- drop materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС";
+create materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС" as
+with b as (
+select max("Время") over (partition by url) mt, "Время",
+       atx,
+       "№ строки"
+  from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]"
+ where url = 'https://moscowparks.narod.ru/docs/explication.ods'
+   and "№ листа" = 2
+)
+select b."№ строки",
+       g."Группа",
        atx[1] "Название по OSM",
        atx[2] "Название из пр. устр. 1964-1965 гг.",
        atx[3] "Длина аллеи, м., до 10м",
@@ -20,13 +43,20 @@ select "№ строки",
        atx[8] "Кустарник-бордюр",
        atx[9] "Wikidata",
        regexp_replace(regexp_replace(atx[9], '^https?://', '', 'i'), '.*/', '') "Q",
-       atx[10] "Примечание"
+       atx[10] "Примечание"       
   from b
+inner join "Бирюлёвский дендропарк: Дмитрий"."ДТС группы" g
+   on b."№ строки" > g."№ строки" and b."№ строки" < g.до 
  where "Время" = mt -- По самому позднему из сохранённых файлов
-   and "№ строки" > 2
+   and b."№ строки" > 2
    and atx[1] is not null
    and atx[1] != upper(atx[1])
  order by "№ строки";
+
+refresh  materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС";
+
+--drop  view "Бирюлёвский дендропарк: Дмитрий"."ДТС группы"
+
 
 /*
 create foreign table "Бирюлёвский дендропарк: Дмитрий"."Экспликация wget" (
