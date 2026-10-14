@@ -19,6 +19,7 @@ CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Ос�
 AS SELECT "oпп".tags ->> 'name'::text AS "Название",
 	"oпп".tags ->> 'operator'::text AS "Оператор",
 	"oпп".osm_id,
+	string_to_array(("oпп".tags ->> 'old_ref'), ';') "Старые номера",
 	"oпп".geom
 FROM "Бирюлёвский дендропарк: OSM"."∀ osmium" "oпп"
 WHERE ("oпп".tags ->> 'leisure'::text) = 'park'::text AND ("oпп".tags ->> 'name'::text) = 'Бирюлёвский дендропарк: OSM'::text;
@@ -49,6 +50,17 @@ AS SELECT osm_id,
   WHERE (tags ->> 'boundary'::text) = 'forest_compartment'::text AND (tags ->> 'name'::text) ~ '^\d+(\.\d+)?$'::text
   ORDER BY ((tags ->> 'name'::text)::smallint);
 COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Участки" IS 'Участки дендропарка по лесотехнической БД. Общая граница исключена из выборки.';
+
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Участки проекта 1941 г."
+AS SELECT unnest("Старые номера")::smallint AS "№ 1941 г.",
+    "№" AS "№ 1962 г.",
+    osm_id,
+    osm_type,
+    "Описание",
+    geom
+   FROM "Бирюлёвский дендропарк"."Участки"
+  ORDER BY (unnest("Старые номера")::smallint);
+COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Участки проекта 1941 г." IS 'Указатель участков по старой нумерации в соотношении М:М с участками новой нумерации. Обычно участки старой нумерации меньше.';
 
 -- Убедиться что данные заполнились!
 select ST_Area(ST_Transform(geom, 26986)) / 10000.0 "Площадь в га"
