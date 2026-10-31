@@ -7,7 +7,7 @@ select
   (http_get(
     'https://query.wikidata.org/sparql?query=' || 
     urlencode(
-      'SELECT ?картинка ?элемент ?элементLabel ?типДорогиLabel ?№ ?Категория ?основательLabel ?дата_основания WHERE {
+      'SELECT ?картинка ?элемент ?элементLabel ?типДорогиLabel ?№ ?Категория ?основательLabel ?дата_основания ?geo WHERE {
   ?элемент wdt:P361 wd:Q4087179;
     p:P361 ?stn.
   OPTIONAL { ?stn pq:P1545 ?№. }
@@ -16,6 +16,7 @@ select
   OPTIONAL { ?элемент wdt:P112 ?основатель. }
   OPTIONAL { ?элемент wdt:P580 ?дата_основания. }
   OPTIONAL { ?элемент wdt:P18 ?картинка. }
+  OPTIONAL { ?элемент wdt:P625 ?geo. }
   ?типДороги (wdt:P279*) ?родитель.  
   FILTER(?родитель IN(wd:Q34442, wd:Q5004679, wd:Q174782, wd:Q3352369))
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
@@ -37,7 +38,8 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Q",
        j -> 'картинка' ->> 'value' "Изображение",
        j -> 'элемент' ->> 'value' "wikidata",
        j -> 'основательLabel' ->> 'value' "Основатель",
-       j -> 'дата_основания' ->> 'value' "Дата основания"
+       j -> 'дата_основания' ->> 'value' "Дата основания",
+       ST_GeomFromText(j -> 'geo' ->> 'value') "wkt"
 from element
 order by "№", "название";
 
