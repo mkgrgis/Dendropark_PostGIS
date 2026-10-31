@@ -70,4 +70,4 @@ select pageid,
 			) "Vue"
  from geobaze;
  
-COMMENT ON MATERIALIZED VIEW "Бирюлёвский дендропарк"."WikiMap ∀ curl" IS 'Все данные по точкам с ВикиСклада';
+COMMENT ON MATERIALIZED VIEW "Бирюлёвский дендропарк: ВикиСклад"."Wikimap" IS 'Все данные по точкам фотографий с ВикиСклада';
