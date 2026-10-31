@@ -47,7 +47,7 @@ as
 SELECT p.*,
 	   st_intersection("ог".geom, p."φλ₀") AS geom,
 	   st_geometrytype(st_intersection("ог".geom, p."φλ₀")) AS geom_type
-  FROM "Бирюлёвский дендропарк: PastVu"."PastVu ∀ curl" p
+  FROM "Бирюлёвский дендропарк: PastVu"."∀ curl" p
   JOIN "Бирюлёвский дендропарк: OSM"."Основная граница" "ог"
 	ON st_contains("ог".geom, p."φλ₀")	 
   WITH DATA;
