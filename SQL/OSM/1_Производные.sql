@@ -38,8 +38,8 @@ select a.osm_id,
        a.tags ->> 'note' AS "заметки",
        a.tags ->> 'description' AS "описание",
        a.tags - 'name' - 'tourism' - 'information' - 'board_type' - 'taxon' - 'taxon:ru' - 'genus' - 'genus:ru' - 'start_date' - 'note' AS tags
-  from "Бирюлёвский дендропарк"."OSM ∀" a
-  left join "Бирюлёвский дендропарк"."Участки" u
+  from "Бирюлёвский дендропарк: OSM"."∀" a
+  left join "Бирюлёвский дендропарк: OSM"."Участки" u
     on  st_intersects(u.geom, a.geom)
   where ((a.tags ->> 'tourism') = 'information' or (a.tags ->> 'was:tourism') = 'information')
     and ((a.tags ->> 'information') = 'board' or (a.tags ->> 'was:information') = 'board')

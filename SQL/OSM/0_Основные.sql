@@ -43,6 +43,7 @@ CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Уч�
 AS SELECT osm_id,
 		osm_type,
 		(tags ->> 'name'::text)::smallint AS "№",
+		string_to_array(tags ->> 'old_ref', ';'::text) AS "Старые номера",
 		tags ->> 'description'::text AS "Описание",
 		geom
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
@@ -57,7 +58,7 @@ AS SELECT unnest("Старые номера")::smallint AS "№ 1941 г.",
     osm_type,
     "Описание",
     geom
-   FROM "Бирюлёвский дендропарк"."Участки"
+   FROM "Бирюлёвский дендропарк: OSM"."Участки"
   ORDER BY (unnest("Старые номера")::smallint);
 COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Участки проекта 1941 г." IS 'Указатель участков по старой нумерации в соотношении М:М с участками новой нумерации. Обычно участки старой нумерации меньше.';
 

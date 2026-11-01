@@ -101,7 +101,7 @@ select distinct
 	   unnest(string_to_array(a.tags ->> 'genus', ';')) AS genus,
 	   unnest(string_to_array(a.tags ->> 'genus:ru', ';')) AS "род"
   from "Бирюлёвский дендропарк"."OSM ∀" a 
-  left join "Бирюлёвский дендропарк"."Участки" u ON st_within(a.geom, u.geom)
+  left join "Бирюлёвский дендропарк: OSM"."Участки" u ON st_within(a.geom, u.geom)
   left join "Бирюлёвский дендропарк"."№№ пл. по ОСМ" m
 	on m."Уч." =  u."№"
    and m."Код" = a.tags ->> 'ref'
