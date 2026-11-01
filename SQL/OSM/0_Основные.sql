@@ -19,10 +19,9 @@ CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Ос�
 AS SELECT "oпп".tags ->> 'name'::text AS "Название",
 	"oпп".tags ->> 'operator'::text AS "Оператор",
 	"oпп".osm_id,
-	string_to_array(("oпп".tags ->> 'old_ref'), ';') "Старые номера",
 	"oпп".geom
 FROM "Бирюлёвский дендропарк: OSM"."∀ osmium" "oпп"
-WHERE ("oпп".tags ->> 'leisure'::text) = 'park'::text AND ("oпп".tags ->> 'name'::text) = 'Бирюлёвский дендропарк: OSM'::text;
+WHERE ("oпп".tags ->> 'leisure'::text) = 'park'::text AND ("oпп".tags ->> 'name'::text) = 'Бирюлёвский дендропарк'::text;
 
 COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Основная граница" IS 'Фильтр, выделяющий из данных, содержащих Бирюлёвский дендропарк: OSM его границу.';
 
@@ -51,7 +50,7 @@ AS SELECT osm_id,
   ORDER BY ((tags ->> 'name'::text)::smallint);
 COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Участки" IS 'Участки дендропарка по лесотехнической БД. Общая граница исключена из выборки.';
 
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк"."Участки проекта 1941 г."
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Участки проекта 1941 г."
 AS SELECT unnest("Старые номера")::smallint AS "№ 1941 г.",
     "№" AS "№ 1962 г.",
     osm_id,

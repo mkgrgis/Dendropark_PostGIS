@@ -45,7 +45,15 @@ select a.osm_id,
     and ((a.tags ->> 'information') = 'board' or (a.tags ->> 'was:information') = 'board')
     and (a.tags ->> 'board_type') = 'plants'
   order by u."№";
-  
+
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."ДТС 0"
+AS SELECT st_union(geom) AS geom,
+    tags ->> 'name'::text AS "Название"
+   FROM "Бирюлёвский дендропарк: OSM"."∀" a
+  WHERE (tags ->> 'highway'::text) IS NOT NULL
+  GROUP BY (tags ->> 'name'::text);
+COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."ДТС 0" IS 'Все элементы дорожно-тропиночной сети в зависимости от формы представления в OSM';
+
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."ДТС"
 AS SELECT
         CASE
@@ -61,14 +69,7 @@ AS SELECT
     st_asgeojson(geom) AS "GeoJSON"
    FROM "Бирюлёвский дендропарк: OSM"."ДТС 0" "д"
   ORDER BY "Название";
-
-
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."ДТС 0"
-AS SELECT st_union(geom) AS geom,
-    tags ->> 'name'::text AS "Название"
-   FROM "Бирюлёвский дендропарк: OSM"."∀" a
-  WHERE (tags ->> 'highway'::text) IS NOT NULL
-  GROUP BY (tags ->> 'name'::text);
+COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."ДТС" IS 'Сгруппированные по названию элементы дорожно-тропиночной сети';
 
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Дороги"
 AS SELECT a.osm_id,
@@ -128,3 +129,4 @@ AS SELECT a.osm_id,
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (a.tags ->> 'man_made'::text) = 'bridge'::text;
 
+-- конец
