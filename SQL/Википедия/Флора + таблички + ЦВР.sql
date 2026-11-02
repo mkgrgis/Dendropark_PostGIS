@@ -75,7 +75,7 @@ order by "Уч." asc, "№" asc;
 
 -- Формирователь реляционного табличного вида
 -- подтверждённой табличками части дендрологической коллекции
-create materialized view "Бирюлёвский дендропарк: Википедия"."Таблички" as
+create materialized view "Бирюлёвский дендропарк: Википедия"."Флористические таблички" as
 with s_agg as ( -- Слияние всех полученных текстовых данных
 select string_agg(content, '
 ') t,
@@ -113,7 +113,10 @@ select case when a[1] ~ '×' then split_part(split_part(a[1], '&', 1), '
        case when a[1] !~ '×' then a[1] else null end "Указание на аллею",
        split_part(split_part(split_part(a[1], '×', 2), '&', 1), '
 ', 1) "№_",
-       a[2] "Изображение",
+       --a[2] "Изображение",
+       split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 1) "Файл",
+       split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 2) "Флаг файла",
+       split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 3) "Название",
        a[3] "lat",       
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', 1) "Вид или род wiki",
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род", 

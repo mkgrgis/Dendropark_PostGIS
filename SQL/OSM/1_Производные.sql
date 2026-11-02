@@ -23,7 +23,7 @@ select geom,
 	   osm_id
   from b;
 
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Таблички маточных площадок" AS
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Флористические таблички" AS
 select a.osm_id,
        a.osm_type,
        a.geom,
