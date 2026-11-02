@@ -116,7 +116,7 @@ select case when a[1] ~ '×' then split_part(split_part(a[1], '&', 1), '
        --a[2] "Изображение",
        split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 1) "Файл",
        split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 2) "Флаг файла",
-       split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 3) "Название",
+       replace(split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 3), '&amp;', '&') "Название",
        a[3] "lat",       
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', 1) "Вид или род wiki",
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род", 
@@ -168,8 +168,9 @@ select a[1]::int2 "№",
        split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 2) "надпись для OSM URL",
        split_part(a[4], '-', 1)::float4  "обзор мин",
        split_part(a[4], '-', -1)::float4 "обзор макс",       
-       a[5]::float4 "азимут"
-from arr;
+       a[5]::float4 "азимут",
+       a[4] α
+  from arr;
 
 -- Формирователь реляционного табличного вида
 -- списка аллей
@@ -214,5 +215,5 @@ select a[1]::int2 "№",
 from arr;
 
 refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флора";
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Таблички";
+refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флористические таблички";
 refresh materialized view "Бирюлёвский дендропарк: Википедия"."Ценные видовые раскрытия";

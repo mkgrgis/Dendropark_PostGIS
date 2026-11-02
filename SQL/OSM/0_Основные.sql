@@ -28,13 +28,14 @@ COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Основн
 
 CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк: OSM"."∀"
 TABLESPACE pg_default
-AS SELECT "oпп".osm_id,
-	"oпп".osm_type,
-	"oпп".tags,
-	st_intersection("ог".geom, "oпп".geom) AS geom,
-	st_geometrytype(st_intersection("ог".geom, "oпп".geom)) geom_type
-	FROM "Бирюлёвский дендропарк: OSM"."∀ osmium" "oпп"
-	JOIN "Бирюлёвский дендропарк: OSM"."Основная граница" "ог" ON st_intersects("ог".geom, "oпп".geom)
+AS SELECT a.osm_id,
+	a.osm_type,
+	a.tags,
+	st_intersection("ог".geom, a.geom) AS geom,
+	st_geometrytype(st_intersection("ог".geom, a.geom)) geom_type,
+	'https://openstreetmap.org/'|| a.osm_type || '/' || a.osm_id "OSM URL"
+	FROM "Бирюлёвский дендропарк: OSM"."∀ osmium" a
+	JOIN "Бирюлёвский дендропарк: OSM"."Основная граница" "ог" ON st_intersects("ог".geom, a.geom)
 WITH DATA;
 
 COMMENT ON MATERIALIZED VIEW "Бирюлёвский дендропарк: OSM"."∀" IS 'Все данные, относящиеся к Бирюлёвскому дендропарку включая данные на его границах.';
@@ -45,7 +46,8 @@ AS SELECT osm_id,
 		(tags ->> 'name'::text)::smallint AS "№",
 		string_to_array(tags ->> 'old_ref', ';'::text) AS "Старые номера",
 		tags ->> 'description'::text AS "Описание",
-		geom
+		geom,
+		"OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (tags ->> 'boundary'::text) = 'forest_compartment'::text AND (tags ->> 'name'::text) ~ '^\d+(\.\d+)?$'::text
   ORDER BY ((tags ->> 'name'::text)::smallint);
@@ -57,10 +59,15 @@ AS SELECT unnest("Старые номера")::smallint AS "№ 1941 г.",
     osm_id,
     osm_type,
     "Описание",
-    geom
+    geom,
+    "OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."Участки"
   ORDER BY (unnest("Старые номера")::smallint);
 COMMENT ON VIEW "Бирюлёвский дендропарк: OSM"."Участки проекта 1941 г." IS 'Указатель участков по старой нумерации в соотношении М:М с участками новой нумерации. Обычно участки старой нумерации меньше.';
+
+-- Прповерка полноты натурального ряда старых кодов участков по проекту 1941 года
+select u.* from generate_series(1,89) n
+full join "Бирюлёвский дендропарк: OSM"."Участки проекта 1941 г." u on u."№ 1941 г." = n.n
 
 -- Убедиться что данные заполнились!
 select ST_Area(ST_Transform(geom, 26986)) / 10000.0 "Площадь в га"

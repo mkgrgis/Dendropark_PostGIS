@@ -1,11 +1,12 @@
-CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Ценные видовые раскрытия" as
+CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Видовые точки" as
 with b as (
 	select (tags ->> 'ref')::int2 "№",
 		   (tags ->> 'name') "Название",
 		   (tags ->> 'direction') α,
 		   geom,
 		   osm_type,
-		   osm_id
+		   osm_id,
+		   "OSM URL"
 	  FROM "Бирюлёвский дендропарк: OSM"."∀" a
 	 WHERE (tags ->> 'tourism') = 'viewpoint'
 	 order by "№" nulls last
@@ -20,24 +21,27 @@ select geom,
 			then α::float
 		 end ::float α₀,
 	   osm_type,
-	   osm_id
+	   osm_id,
+       "OSM URL"
   from b;
 
 CREATE OR REPLACE VIEW "Бирюлёвский дендропарк: OSM"."Флористические таблички" AS
 select a.osm_id,
        a.osm_type,
        a.geom,
-       u."№" AS "Уч.",
-       a.tags ->> 'name' AS "название",
-       a.tags ->> 'taxon' AS taxon,
-       a.tags ->> 'taxon:ru' AS "вид",
-       a.tags ->> 'genus' AS genus,
-       a.tags ->> 'genus:ru' AS "род",
-       a.tags ->> 'source:taxon' AS "подтв вида",
-       a.tags ->> 'start_date' AS "создано",
-       a.tags ->> 'note' AS "заметки",
-       a.tags ->> 'description' AS "описание",
-       a.tags - 'name' - 'tourism' - 'information' - 'board_type' - 'taxon' - 'taxon:ru' - 'genus' - 'genus:ru' - 'start_date' - 'note' AS tags
+       u."№" "Уч.",
+       a.tags ->> 'name' "название",
+       a.tags ->> 'taxon' taxon,
+       a.tags ->> 'taxon:ru' "вид",
+       a.tags ->> 'genus' genus,
+       a.tags ->> 'genus:ru' "род",
+       a.tags ->> 'source:taxon' "подтв вида",
+       a.tags ->> 'start_date' "создано",
+       a.tags ->> 'note' "заметки",
+       a.tags ->> 'description' "описание",
+       a.tags ->> 'wikimedia_commons' "Файл ВикиСклада",
+       a.tags - 'name' - 'tourism' - 'information' - 'board_type' - 'taxon' - 'taxon:ru' - 'genus' - 'genus:ru' - 'start_date' - 'note' - 'description' - 'wikimedia_commons' AS tags,
+       a."OSM URL"
   from "Бирюлёвский дендропарк: OSM"."∀" a
   left join "Бирюлёвский дендропарк: OSM"."Участки" u
     on  st_intersects(u.geom, a.geom)
@@ -81,7 +85,8 @@ AS SELECT a.osm_id,
     a.tags ->> 'width'::text AS width,
     a.tags ->> 'note'::text AS "заметки",
     a.tags ->> 'description'::text AS "описание",
-    a.tags - 'highway'::text - 'surface'::text - 'width'::text - 'note'::text - 'description'::text AS tags
+    a.tags - 'highway'::text - 'surface'::text - 'width'::text - 'note'::text - 'description'::text AS tags,
+    a."OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (a.tags ->> 'highway'::text) IS NOT NULL AND (a.tags ->> 'highway'::text) <> 'street_lamp'::text AND (a.tags ->> 'highway'::text) <> 'steps'::text;
 
@@ -96,7 +101,8 @@ AS SELECT a.osm_id,
     st_area(a.geom) AS "площадь",
     a.tags ->> 'note'::text AS "заметки",
     a.tags ->> 'description'::text AS "описание",
-    a.tags - 'building'::text - 'name'::text - 'height'::text - 'note'::text - 'description'::text AS tags
+    a.tags - 'building'::text - 'name'::text - 'height'::text - 'note'::text - 'description'::text AS tags,
+    a."OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (a.tags ->> 'building'::text) IS NOT NULL;
 
@@ -110,7 +116,8 @@ AS SELECT a.osm_id,
     a.tags ->> 'width'::text AS width,
     a.tags ->> 'note'::text AS "заметки",
     a.tags ->> 'description'::text AS "описание",
-    a.tags - 'highway'::text - 'surface'::text - 'width'::text - 'note'::text - 'description'::text AS tags
+    a.tags - 'highway'::text - 'surface'::text - 'width'::text - 'note'::text - 'description'::text AS tags,
+    a."OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (a.tags ->> 'highway'::text) IS NOT NULL AND (a.tags ->> 'highway'::text) = 'steps'::text;
 
@@ -125,7 +132,8 @@ AS SELECT a.osm_id,
     a.tags ->> 'start_date'::text AS "Построено",
     a.tags ->> 'bridge:structure'::text AS "Структура",
     a.tags - 'name'::text - 'note'::text - 'description'::text - 'man_made'::text - 'start_date'::text AS tags,
-    a.tags ->> 'layer'::text AS l
+    a.tags ->> 'layer'::text AS l,
+    a."OSM URL"
    FROM "Бирюлёвский дендропарк: OSM"."∀" a
   WHERE (a.tags ->> 'man_made'::text) = 'bridge'::text;
 
