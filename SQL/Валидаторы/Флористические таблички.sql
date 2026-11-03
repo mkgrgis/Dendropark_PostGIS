@@ -18,7 +18,10 @@ select o.osm_id is not null "OSM",
        (wp."Адрес" is not null or wp."Указание на аллею" is not null) "Википедия",
        wp."Адрес" is not null "флора площадки", -- опущенный флаг указывает на флору аллеи
        wp."OSM URL" = o."OSM URL" "OSM URL eq",
-       wp."Название" = o.название "Название eq",       
+       wp."Название" = o.название "Название eq",
+       lower(wp."Название") ~ lower(coalesce(o.род, ((regexp_match(o.вид, '(?<=(^|\n)\s*?)\S+'))[1]))) is true "род eq",
+       coalesce(o.род, ((regexp_match(o.вид, '(?<=(^|\n)\s*?)\S+'))[1]))
+        систематика,
        wp."Название" "wp назв",
        o.название "OSM назв",
        o.tags ->> 'was:tourism'::text = 'information' "Демонтирована",       
@@ -27,6 +30,7 @@ select o.osm_id is not null "OSM",
        o."OSM URL",
        wc."URL" "ВикиСклад URL",
        wp."Адрес",
+       wc."Уч.",
        o.geom "φλ OSM",
        wc.φλ₁,
        wc.φλ₀
@@ -40,6 +44,7 @@ select o.osm_id is not null "OSM",
    and (wp."Адрес" is not null or wp."Указание на аллею" is not null)
    and wp."OSM URL" = o."OSM URL" -- Правильно указывается
    and wp."Название" = o.название
+ order by wc."Уч." asc, "Адрес"
 ;
 
 -- Некомплектные случаи: 1 дубль фото на Викискладе + 1 табличка образца 1962 года + OSM плакаты о растениях

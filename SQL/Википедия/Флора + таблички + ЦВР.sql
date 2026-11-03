@@ -67,8 +67,9 @@ from arr;
 create view "Бирюлёвский дендропарк: Википедия"."№№ пл. по Википедии" as
 select distinct regexp_substr("Адрес", '^\d+')::int2 "Уч.",
        regexp_substr("Адрес", '(?<=×)\d+')::int2 "№ ОКН",
-       regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))')::int2 "№",
+       regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))')::int2 "№ ориг",
        regexp_substr("Адрес", '(?<=×\d+\().+') ~ '’' "штрих",
+       coalesce (regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))'), regexp_substr("Адрес", '(?<=×)\d+'))::int2 "№",
        "Адрес"
 from "Бирюлёвский дендропарк: Википедия"."Флора"
 order by "Уч." asc, "№" asc;
