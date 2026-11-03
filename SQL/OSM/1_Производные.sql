@@ -140,7 +140,8 @@ AS SELECT a.osm_id,
 create or replace view "Бирюлёвский дендропарк: OSM"."ДТС Wikidata" as
 select st_union(geom) geom,
        tags ->> 'name'::text AS "Название",
-       tags ->> 'wikidata' "Q"
+       tags ->> 'wikidata' "Q",
+       round((ST_Length(st_union(geom))*100000)::numeric, 0)::int l
   from "Бирюлёвский дендропарк: OSM"."∀" a
  where (tags ->> 'highway'::text) is not null 
    and (tags ->> 'wikidata'::text) is not null
