@@ -21,8 +21,8 @@ from url,
      http_get(url.url);
 
 -- Функция создаётся от администратора, требует установки недоверенного языка Python_
--- обычно помещаемого в отдельном пакете ОС 
--- Создание Выполняется от администратора, позднее используется кем угодно 
+-- обычно помещаемого в отдельном пакете ОС
+-- Создание Выполняется от администратора, позднее используется кем угодно
 create or replace function unzip_bytea_rows(zip_blob bytea)
 returns table(filename text, file_data bytea)
 language plpython3u as $$
@@ -44,7 +44,7 @@ select unzip_bytea_rows(ods) r,
        o.url
   from "Бирюлёвский дендропарк: Дмитрий"."ods" o
 ),
-xml_content as ( 
+xml_content as (
 select "№",
        "Время",
        url,
@@ -91,17 +91,17 @@ tr as (
            url,
            "№ листа",
            odf_ns,
-           unnest(xpath('//table:table-row', xml, odf_ns)) AS row_node           
+           unnest(xpath('//table:table-row', xml, odf_ns)) AS row_node
     from b
   ),
-tr1 as ( 
+tr1 as (
 select "№",
        "Время",
        url,
        "№ листа",
        odf_ns,
-       row_number() over (partition by "№", "Время", url, "№ листа") "№ строки",  
-       row_node 
+       row_number() over (partition by "№", "Время", url, "№ листа") "№ строки",
+       row_node
   from tr
 ),
 rc as (
@@ -112,7 +112,7 @@ select "№",
        "№ строки",
        odf_ns,
        unnest(xpath('//table:table-cell', row_node, odf_ns)) cell_xml,
-       row_node       
+       row_node
   from tr1
 ),
 rc1 as (
@@ -128,7 +128,7 @@ select "№",
        array_to_string(xpath('//text:p/text()', cell_xml, odf_ns), '
 ') c_text
    from rc),
-rc2 as (   
+rc2 as (
 select "№",
        "Время",
        url,
@@ -136,7 +136,7 @@ select "№",
        "№ строки",
        row_node,
        n_rep,
-       unnest( array[c_text] || array_fill(null::text, array[coalesce(n_rep - 1, 0)])) txt 
+       unnest( array[c_text] || array_fill(null::text, array[coalesce(n_rep - 1, 0)])) txt
   from rc1
 )
 select "№",
@@ -151,13 +151,13 @@ select "№",
   from rc2;
 
 -- Свёрнутый в массив вид всех ячеек всех листов всех ods документов.
-create or replace view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]" as  
+create or replace view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]" as
 select "№",
        "Время",
        url,
        "№ листа",
-       "№ строки",       
-       array_agg(txt) atx       
+       "№ строки",
+       array_agg(txt) atx
   from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки"
  group by "№", "Время", url, "№ листа", "№ строки"
  order by "№", "Время", url, "№ листа", "№ строки";

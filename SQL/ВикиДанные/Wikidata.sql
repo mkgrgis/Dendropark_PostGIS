@@ -5,7 +5,7 @@ create materialized view "Бирюлёвский дендропарк: WikiData"
 with wikidata_json as (
 select
   (http_get(
-    'https://query.wikidata.org/sparql?query=' || 
+    'https://query.wikidata.org/sparql?query=' ||
     urlencode(
       'SELECT DISTINCT ?картинка ?элемент ?элементLabel ?типДорогиLabel ?№ ?Категория ?основательLabel ?дата_основания ?geo WHERE {
   ?элемент wdt:P361 wd:Q4087179;
@@ -17,7 +17,7 @@ select
   OPTIONAL { ?элемент wdt:P580 ?дата_основания. }
   OPTIONAL { ?элемент wdt:P18 ?картинка. }
   OPTIONAL { ?элемент wdt:P625 ?geo. }
-  ?типДороги (wdt:P279*) ?родитель.  
+  ?типДороги (wdt:P279*) ?родитель.
   FILTER(?родитель IN(wd:Q34442, wd:Q5004679, wd:Q174782, wd:Q3352369))
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
 }'
@@ -29,7 +29,7 @@ element as (
 select json_array_elements(j_r) j
   from wikidata_json
 )
-select split_part(j -> 'элемент' ->> 'value', '/', -1) "Q",       
+select split_part(j -> 'элемент' ->> 'value', '/', -1) "Q",
        j -> 'элементLabel' ->> 'xml:lang' "язык",
        j -> 'элементLabel' ->> 'value' "название",
        j -> 'типДорогиLabel' ->> 'value' "тип",
@@ -48,7 +48,7 @@ create materialized view "Бирюлёвский дендропарк: WikiData"
 with wikidata_json as (
 select
   (http_get(
-    'https://query.wikidata.org/sparql?query=' || 
+    'https://query.wikidata.org/sparql?query=' ||
     urlencode(
       'SELECT ?элемент ?типLabel ?тип ?№ WHERE {
   ?элемент wdt:P361* wd:Q4087179;
@@ -66,7 +66,7 @@ element as (
 select json_array_elements(j_r) j
   from wikidata_json
 )
-select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",       
+select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
        j -> 'типLabel' ->> 'value' "Тип",
        split_part(j -> 'тип' ->> 'value', '/', -1) "Тип Q",
        (j -> '№' ->> 'value') "№ в ОКН",
@@ -80,13 +80,13 @@ create materialized view "Бирюлёвский дендропарк: WikiData"
 with wikidata_json as (
 select
   (http_get(
-    'https://query.wikidata.org/sparql?query=' || 
+    'https://query.wikidata.org/sparql?query=' ||
     urlencode(
       'SELECT ?элемент ?элементLabel ?№ ?в_составе ?в_составеLabel WHERE {
   ?элемент (wdt:P361*) wd:Q4087179;
     p:P361 ?stn.
   ?stn pq:P1545 ?№.
-  ?элемент wdt:P361 ?в_составе.  
+  ?элемент wdt:P361 ?в_составе.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
 }
 ORDER BY (?№)'
@@ -102,10 +102,10 @@ select json_array_elements(j_r) j
 select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
        split_part(j -> 'в_составе' ->> 'value', '/', -1) "Надобъект Q",
        j -> 'элементLabel' ->> 'value' "Объект",
-       j -> 'в_составеLabel' ->> 'value' "Надобъект",       
+       j -> 'в_составеLabel' ->> 'value' "Надобъект",
        (j -> '№' ->> 'value') "№ в ОКН",
        j -> 'элемент' ->> 'value' "Объект URL",
-       j -> 'в_составе' ->> 'value' "Надобъект URL"       
+       j -> 'в_составе' ->> 'value' "Надобъект URL"
 from element
 order by "№ в ОКН", "Объект Q";
 
@@ -114,12 +114,12 @@ create materialized view "Б1ирюлёвский дендропарк: WikiData
 with wikidata_json as (
 select
   (http_get(
-    'https://query.wikidata.org/sparql?query=' || 
+    'https://query.wikidata.org/sparql?query=' ||
     urlencode(
       'SELECT ?элемент ?элементLabel ?№ ?картинка ?категория ?в_составе WHERE {
   ?элемент (wdt:P361*) wd:Q4087179;
     p:P361 ?stn.
-  ?stn pq:P1545 ?№.  
+  ?stn pq:P1545 ?№.
   OPTIONAL { ?элемент wdt:P373 ?категория. }
   OPTIONAL { ?элемент wdt:P18 ?картинка. }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
@@ -134,23 +134,23 @@ select json_array_elements(j_r) j
   from wikidata_json
 )
 -- ?элемент ?элементLabel ?№ ?картинка ?категория ?в_составе
-select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",       
-       j -> 'элементLabel' ->> 'value' "Объект",       
+select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
+       j -> 'элементLabel' ->> 'value' "Объект",
        (j -> '№' ->> 'value') "№ в ОКН",
-       j -> 'элемент' ->> 'value' "Объект URL",       
+       j -> 'элемент' ->> 'value' "Объект URL",
        j -> 'картинка' ->> 'value' "Картинка",
        j -> 'категория' ->> 'value' "Категория"
 from element
 order by "№ в ОКН", "Объект Q";
 
-create or replace view "Бирюлёвский дендропарк: WikiData"."Аллеи ОКН" as 
+create or replace view "Бирюлёвский дендропарк: WikiData"."Аллеи ОКН" as
 select e.*
   from "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: надобъект" n
  inner join "Бирюлёвский дендропарк: WikiData"."Элементы ОКН" e
  using ("Объект Q")
  where n."Надобъект" in (
        'Аллеи 1938-1960-х годов включая направление и двухрядную обсадку',
-       'Граничная обсадка 1938-1960-х годов' );  
+       'Граничная обсадка 1938-1960-х годов' );
 
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть";
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: типы";

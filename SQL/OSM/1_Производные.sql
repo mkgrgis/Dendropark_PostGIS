@@ -143,7 +143,7 @@ select st_union(geom) geom,
        tags ->> 'wikidata' "Q",
        round((ST_Length(st_union(geom))*100000)::numeric, 0)::int l
   from "Бирюлёвский дендропарк: OSM"."∀" a
- where (tags ->> 'highway'::text) is not null 
+ where (tags ->> 'highway'::text) is not null
    and (tags ->> 'wikidata'::text) is not null
  group by (tags ->> 'name'::text), (tags ->> 'wikidata'::text);
 comment on view "Бирюлёвский дендропарк: OSM"."ДТС Wikidata" is 'Дороги ДТС с указанием кода викиданных';
@@ -153,8 +153,8 @@ select st_union(geom) geom,
        tags ->> 'wikidata' "Q"
   from "Бирюлёвский дендропарк: OSM"."∀" a
  where (tags ->> 'wikidata'::text) is not null
-   and ((tags ->> 'natural'::text) = 'tree_row' 
-    or (tags ->> 'barrier'::text) = 'hedge') 
+   and ((tags ->> 'natural'::text) = 'tree_row'
+    or (tags ->> 'barrier'::text) = 'hedge')
  group by (tags ->> 'wikidata'::text);
 comment on view "Бирюлёвский дендропарк: OSM"."Обсадки аллей Wikidata" is 'Обсадки и бордюры аллей с указанием кода викиданных';
 

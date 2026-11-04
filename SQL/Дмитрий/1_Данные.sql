@@ -43,10 +43,10 @@ select b."№ строки",
        atx[8] "Кустарник-бордюр",
        atx[9] "Wikidata",
        regexp_replace(regexp_replace(atx[9], '^https?://', '', 'i'), '.*/', '') "Q",
-       atx[10] "Примечание"       
+       atx[10] "Примечание"
   from b
 inner join "Бирюлёвский дендропарк: Дмитрий"."ДТС группы" g
-   on b."№ строки" > g."№ строки" and b."№ строки" < g.до 
+   on b."№ строки" > g."№ строки" and b."№ строки" < g.до
  where "Время" = mt -- По самому позднему из сохранённых файлов
    and b."№ строки" > 2
    and atx[1] is not null
@@ -77,7 +77,7 @@ cat explication-Лист1.csv;
 
 -- Первичная форма экспликации до разбора пометок видов
 -- drop view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" cascade
-create view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" as
+create or replace view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
        atx, "№ строки"
@@ -87,14 +87,11 @@ select max("Время") over (partition by url) mt, "Время",
    and atx[1] != ''
 )
 select "№ строки",
-       split_part(atx[1], '
-', 1) "Адрес",
-       split_part(atx[1], '
-', 2) "Название",
+       split_part(atx[1], E'\n', 1) "Адрес",
+       split_part(atx[1], E'\n', 2) "Название",
        regexp_substr(atx[1], '^\d+')::int2 "Уч.",
-       regexp_substr(atx[1], '(?<=×.?)\d+')::int2 "№сортировочный",
-       regexp_substr(split_part(atx[1], '
-', 1), '(?<=×).+') "№",
+       regexp_substr(atx[1], '(?<=×.?)\d+')::int2 "№₀",
+       regexp_substr(split_part(atx[1], E'\n', 1), '(?<=×).+') "№",
        atx[2] "Подтв. 1978/2016",
        atx[3] "Проект 1965",
        atx[4] "Исчез 1976-2016",
@@ -126,9 +123,10 @@ comment on column "Бирюлёвский дендропарк: Дмитрий".
 -- Список номеров маточных площадок
 refresh materialized view "Бирюлёвский дендропарк: Дмитрий"."№№ пл. по экспликациии";
 create materialized view "Бирюлёвский дендропарк: Дмитрий"."№№ пл. по экспликациии" AS
+
 select distinct "Уч.",
-       "№сортировочный",
        "№",
+       "ref",
        "Адрес"
  from "Бирюлёвский дендропарк: Дмитрий"."Экспликация"
 where "Адрес" is not null

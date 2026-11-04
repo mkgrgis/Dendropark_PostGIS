@@ -22,9 +22,9 @@ select string_agg(content, '
 ') t,
 '(?<=Опись дендрологической коллекции)[^}]+}' as filter
 from "Бирюлёвский дендропарк: Википедия".wget
-), 
+),
 floral_t as ( -- Ракрывающаяся таблица в разделе «"Флора"»
-select (regexp_match(t,  filter))[1] t 
+select (regexp_match(t,  filter))[1] t
 from s_agg
 ),
 tab_okn as ( -- Вложенная таблица из паспорта ОКН
@@ -65,14 +65,23 @@ from arr;
 
 -- Список номеров маточных площадок
 create view "Бирюлёвский дендропарк: Википедия"."№№ пл. по Википедии" as
+with orig as (
 select distinct regexp_substr("Адрес", '^\d+')::int2 "Уч.",
-       regexp_substr("Адрес", '(?<=×)\d+')::int2 "№ ОКН",
-       regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))')::int2 "№ ориг",
-       regexp_substr("Адрес", '(?<=×\d+\().+') ~ '’' "штрих",
-       coalesce (regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))'), regexp_substr("Адрес", '(?<=×)\d+'))::int2 "№",
-       "Адрес"
-from "Бирюлёвский дендропарк: Википедия"."Флора"
-order by "Уч." asc, "№" asc;
+       regexp_substr("Адрес", '(?<=×)\d+')::int "№ в ОКН",
+       -- regexp_substr("Адрес", '(?<=×\d+\().+') ~ '’' "штрих",
+       regexp_substr("Адрес", '(?<=×\d+\()\d+’?(?=\))') "№денд",
+       "Адрес" "Адрес₀"
+  from "Бирюлёвский дендропарк: Википедия"."Флора"
+  -- coalesce (regexp_substr("Адрес", '(?<=×\d+\()\d+(?=’\))'), regexp_substr("Адрес", '(?<=×)\d+'))::int2 "№",
+)
+select "Уч.",
+       coalesce("№денд", "№ в ОКН"::text) "№",
+       regexp_substr(coalesce("№денд", "№ в ОКН"::text), '^\d+')::int2 "№₀",
+       "№денд",
+       "Уч." || '×' || coalesce("№денд", "№ в ОКН"::text) "Адрес",
+       "Уч." || '×' || "№ в ОКН"::text "Адрес в ОКН"
+  from orig
+ order by "Уч." asc, "№₀" asc, "№" asc;
 
 -- Формирователь реляционного табличного вида
 -- подтверждённой табличками части дендрологической коллекции
@@ -82,9 +91,9 @@ select string_agg(content, '
 ') t,
 '(?<=Список видовых табличек)[^}]+}' as filter
 from "Бирюлёвский дендропарк: Википедия".wget
-), 
+),
 floral_t as ( -- Ракрывающаяся таблица в разделе «"Флора"»
-select (regexp_match(t,  filter))[1] t 
+select (regexp_match(t,  filter))[1] t
 from s_agg
 ),
 tab_vt as ( -- Вложенная таблица списка видовых табличек
@@ -118,11 +127,11 @@ select case when a[1] ~ '×' then split_part(split_part(a[1], '&', 1), '
        split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 1) "Файл",
        split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 2) "Флаг файла",
        replace(split_part(regexp_replace(regexp_replace(a[2], '^\[\[', ''), '\]\]$', ''), '|', 3), '&amp;', '&') "Название",
-       a[3] "lat",       
+       a[3] "lat",
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', 1) "Вид или род wiki",
-       split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род", 
+       split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род",
        a[5] "ОКН",
-       split_part(regexp_replace(a[6],'\[|\]', '', 'g'), ' ', 1) "OSM URL",       
+       split_part(regexp_replace(a[6],'\[|\]', '', 'g'), ' ', 1) "OSM URL",
        a[7] "обсадка",
        a[8] "примечание",
        a[1] "a1"
@@ -136,9 +145,9 @@ select string_agg(content, '
 ') t,
 '(?<=== Ценные видовые раскрытия ==)(.*?)(?=\|})' as filter
 from "Бирюлёвский дендропарк: Википедия".wget
-), 
+),
 cwr_t as ( -- Ракрывающаяся таблица в разделе «Ценные видовые раскрытия»
-select (regexp_match(t,  filter))[1] t 
+select (regexp_match(t,  filter))[1] t
 from s_agg
 ),
 tab_cwr as ( -- Вложенная таблица списка видовых табличек
@@ -162,13 +171,13 @@ select regexp_split_to_array(c, '
 from cortage
 )
 select a[1]::int2 "№",
-       a[2] "Название",       
+       a[2] "Название",
        split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 1) "URL OSM",
        split_part(split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 1), '/', -1)::int8 "Код OSM",
        split_part(split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 1), '/', -2) "Тип OSM",
        split_part(regexp_replace(a[3],'\[|\]', '', 'g'), ' ', 2) "надпись для OSM URL",
        split_part(a[4], '-', 1)::float4  "обзор мин",
-       split_part(a[4], '-', -1)::float4 "обзор макс",       
+       split_part(a[4], '-', -1)::float4 "обзор макс",
        a[5]::float4 "азимут",
        a[4] α
   from arr;
@@ -181,9 +190,9 @@ select string_agg(content, '
 ') t,
 '(?<====== Аллеи с обсадками =====)(.*?)(?=\|})' as filter
 from "Бирюлёвский дендропарк: Википедия".wget
-), 
+),
 avn_t as ( -- Ракрывающаяся таблица в разделе «Ценные видовые раскрытия»
-select (regexp_match(t,  filter))[1] t 
+select (regexp_match(t,  filter))[1] t
 from s_agg
 ),
 tab_avn as ( -- Вложенная таблица списка видовых табличек
@@ -207,12 +216,13 @@ select regexp_split_to_array(c, '
 from cortage
 )
 select a[1]::int2 "№",
-       a[2] "Название",       
+       a[2] "Название",
        a[3] "Длина",
        split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', 1) "Вид или род wiki",
-       split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род",       
-       a[5] "Код § ОКН",
-       a[6] "Примечание"       
+       split_part(regexp_replace(a[4],'\[|\]', '', 'g'), '|', -1) "Вид или род",
+       trim(unnest(string_to_array(a[5], ','))) "Пункт в ОКН",
+       regexp_substr(trim(unnest(string_to_array(a[5], ','))), '.*(?=\.)') "№ в ОКН",
+       a[6] "Примечание"
 from arr;
 
 refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флора";

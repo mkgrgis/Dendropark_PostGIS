@@ -36,7 +36,7 @@ jobs:
 
       - name: Загрузка данных
         run: bash test/load.sh ${{ env.test_schema }};
-      
+
       - name: Проверка итогового запроса
         run: bash test/control.sh ${{ env.test_schema }}
 

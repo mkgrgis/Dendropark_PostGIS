@@ -6,7 +6,7 @@ with c as (
 	false as paint
 ),
 url as (
-	select 'https://pastvu.com/api2?method=photo.getByBounds&params=%7B%22z%22:18,%22localWork%22:true,%22isPainting%22:' 
+	select 'https://pastvu.com/api2?method=photo.getByBounds&params=%7B%22z%22:18,%22localWork%22:true,%22isPainting%22:'
 			|| c.paint || ',%22geometry%22:%7B%22type%22:%22Polygon%22,%22coordinates%22:'
 			|| c.q
 			|| '%7D%7D' url
@@ -49,5 +49,5 @@ SELECT p.*,
 	   st_geometrytype(st_intersection("ог".geom, p."φλ₀")) AS geom_type
   FROM "Бирюлёвский дендропарк: PastVu"."∀ curl" p
   JOIN "Бирюлёвский дендропарк: OSM"."Основная граница" "ог"
-	ON st_contains("ог".geom, p."φλ₀")	 
+	ON st_contains("ог".geom, p."φλ₀")
   WITH DATA;

@@ -69,7 +69,7 @@ select pageid,
 			end
 			) "Vue"
  from geobaze;
- 
+
 comment on materialized view "Бирюлёвский дендропарк: ВикиСклад"."Wikimap" IS 'Все данные по точкам фотографий с ВикиСклада';
 
 create view "Бирюлёвский дендропарк: ВикиСклад"."Флористические таблички" as
@@ -77,7 +77,7 @@ select w.*,
        (regexp_match(w.title, '(?<=^File\:Табличка «).+?(?=»)'))[1] AS "короткое название",
        (regexp_match(w.title, '(?<=на участке )\d+(?=[ \.])'))[1]::smallint AS "Уч. назв",
        coalesce(u₁."№", u₀."№") "Уч.",
-       (regexp_match(w.title, '(?<=на участке )\d+(?=[ \.])'))[1]::smallint = coalesce(u₁."№", u₀."№") "участок по назв", 
+       (regexp_match(w.title, '(?<=на участке )\d+(?=[ \.])'))[1]::smallint = coalesce(u₁."№", u₀."№") "участок по назв",
        u₀."№" AS "Уч.φλ₀",
        u₁."№" AS "Уч.φλ₁"
   from "Бирюлёвский дендропарк: ВикиСклад"."Wikimap" w
@@ -86,7 +86,7 @@ select w.*,
   left join "Бирюлёвский дендропарк: OSM"."Участки" u₁
     on st_intersects(u₁.geom, w."φλ₁")
   where w.title ~ '^File\:Табличка'
-  order by coalesce(u₁."№", u₀."№");  
+  order by coalesce(u₁."№", u₀."№");
 
 comment on view "Бирюлёвский дендропарк: ВикиСклад"."Флористические таблички" is 'Изображения видовых табличек с добавленеим сведений по участкам';
 
