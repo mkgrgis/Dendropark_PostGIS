@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <libpq-fe.h>
 #include <string.h>
+#include <18/server/catalog/pg_type_d.h>
 
 static void html_escape(const char *s) {
 	if (strncmp(s, "https", 5) == 0) {
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
 	PGconn *conn;
 	PGresult *res;
 	int nfields, nrows, i, j;
+	int x2 = 1;
 
 	if (!conninfo) conninfo = "dbname=postgres";
 	if (argc < 2) {
@@ -71,11 +73,27 @@ int main(int argc, char **argv) {
 	printf("</tr></thead>\n  <tbody>\n");
 
 	for (i = 0; i < nrows; i++) {
-		printf("	<tr>");
+		if (x2) {
+			x2 = 0;
+			printf("	<tr class=\"odd\">");
+			}
+		else {
+			printf("	<tr>");
+			x2 = 1;
+		}
 		for (j = 0; j < nfields; j++) {
-			printf("<td>");
-			if (!PQgetisnull(res, i, j))
+			int bool_t = PQftype(res, j) == BOOLOID;
+			if (PQgetisnull(res, i, j)) {
+				printf("<td>");
+				printf("␀");
+			} else if (bool_t) {
+				int bool_ok = PQgetvalue(res, i, j)[0] == 't';
+				printf("<td style=\"background-color: %s\">", bool_ok ? "#CAF3A3" : "#FA5050" );
+				printf("%s", bool_ok ? "✔" : "✘");
+			} else {
+				printf("<td>");
 				html_escape(PQgetvalue(res, i, j));
+			}
 			printf("</td>");
 		}
 		printf("</tr>\n");
