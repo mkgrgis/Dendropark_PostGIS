@@ -9,6 +9,11 @@ echo '<!DOCTYPE html>
 			border: 1px solid #ccc;
 			width: 100%;
 		}
+		.objmap {
+			height: 250px;
+			border: 1px solid #ccc;
+			width: 250px;
+		}
 		table {
 			width: 100%;
 			border-collapse: collapse;
@@ -17,7 +22,7 @@ echo '<!DOCTYPE html>
 			position: sticky;
 			top: 0;
 			background-color: #f1f1f1;
-			z-index: 1;
+			z-index: 2;
 			border: 2px solid #f04040;
 		}
 		th, td {
@@ -27,13 +32,19 @@ echo '<!DOCTYPE html>
 		}
 		.odd{background:#e8edff;}
 	</style>
+	<link rel="stylesheet" href="leaflet.css" />
 </head>
 <body>
+	<script src="leaflet.js"></script>
+	<script src="hexewkb2geojson.js"></script>
+	<script>
+		const objstyle = { fillOpacity: 0.55, color: "#008800", fillColor: "#000000", weight: 2 };
+	</script>
 	<p>Запрос формирования таблицы</p>
 	<p><code>' >> "$2";
 echo "$1" >> "$2";
 echo '	</code></p>
 <div class="table-container">' >> "$2";
-./pghtml "$1" >> "$2";
+"$(dirname "$0")/pghtmltable" "$1" >> "$2";
 echo '</div>
 </body></html>' >> "$2";
