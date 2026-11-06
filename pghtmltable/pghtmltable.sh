@@ -4,7 +4,7 @@ echo '<!DOCTYPE html>
 	<meta charset="UTF-8"/>
 	<style>
 		.table-container {
-			max-height: 500px;
+			max-height: 700px;
 			overflow-y: auto;
 			border: 1px solid #ccc;
 			width: 100%;
@@ -22,7 +22,7 @@ echo '<!DOCTYPE html>
 			position: sticky;
 			top: 0;
 			background-color: #f1f1f1;
-			z-index: 2;
+			z-index: 3;
 			border: 2px solid #f04040;
 		}
 		th, td {
@@ -30,7 +30,24 @@ echo '<!DOCTYPE html>
 			text-align: left;
 			border: 1px solid #888;
 		}
+		th:first-child {
+			position: sticky;
+			left: 0;
+			top: 0;
+			background-color: #fff1f1;
+			z-index: 4;
+		}
+		td:first-child {
+			position: sticky;
+			left: 0;
+			top: 0;
+			background-color: #f1f1f1;
+			z-index: 3;
+		}
 		.odd{background:#e8edff;}
+		.leaflet-container {
+			z-index: 0
+		}
 	</style>
 	<link rel="stylesheet" href="leaflet.css" />
 </head>
@@ -47,4 +64,7 @@ echo '	</code></p>
 <div class="table-container">' >> "$2";
 "$(dirname "$0")/pghtmltable" "$1" >> "$2";
 echo '</div>
+ 	<p>Акутально на ' >> "$2";
+date +'%Y-%m-%d %H:%M:%S %:z' >> "$2";
+echo '</p>
 </body></html>' >> "$2";

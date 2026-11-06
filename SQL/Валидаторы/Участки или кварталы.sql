@@ -1,6 +1,3 @@
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флора";
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флористические таблички";
-
 -- Перечни участков или кварталов дендропарка
 -- drop view "Бирюлёвский дендропарк"."Участки сводка №№";
 create or replace view "Бирюлёвский дендропарк"."Участки сводка №№" as
@@ -17,12 +14,12 @@ select distinct
   from "Бирюлёвский дендропарк: ОКН"."№№ пл. по паспорту ОКН"
 ),
 o as (
-select u."№" "Уч.",
-       "Старые номера",
+select u."№" "Уч.",       
        "Описание",
        --ST_AsGeoJSON(geom) "GeoJSON",
-       geom,
+       geom "Контур границ",
        "OSM URL",
+       "Старые номера",
        true "ОСМ"
   from "Бирюлёвский дендропарк: OSM"."Участки" u
 ),
@@ -82,6 +79,8 @@ select *
  using ("Уч.")
   full outer join p1997p2
  using ("Уч.")
+/*  full outer join p1997p3
+ using ("Уч.") */
   full outer join fto
  using ("Уч.")
   full outer join ftw
