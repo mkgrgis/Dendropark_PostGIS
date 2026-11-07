@@ -1,3 +1,15 @@
+function ewkbMap(hex, div_id) {
+	const map = L.map(div_id, { zoomControl: false, attributionControl: false });
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+	const geoJSONobj = hexEwkbToGeoJSON(hex);
+	const lg = L.geoJSON(geoJSONobj, objstyle);
+//	g.geometry.coordinates[1] = g.geometry.coordinates[0];
+//	g.geometry.coordinates[0] = [[180, -90], [180, 90], [-180, 90], [-180, -90]];
+//	L.geoJSON(g, objstyle).addTo(map);
+	lg.addTo(map);
+	map.fitBounds(lg.getBounds());
+}
+
 function hexToBytes(hex) {
   if (hex.startsWith("\\x")) hex = hex.slice(2);
   const bytes = new Uint8Array(hex.length / 2);

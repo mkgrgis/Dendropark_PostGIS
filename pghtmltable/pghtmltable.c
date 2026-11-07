@@ -73,7 +73,7 @@ static void print_result(PGconn *conn, PGresult *res) {
 			} else  if (PQftype(res, j) == geom_oid) { /* ST_AsGeoJSON(geom) ! */
 				char *ewkbhex = PQgetvalue(res, i, j);
 				//char *geojson = ewkb_hex_to_geojson(ewkb);
-				fprintf(stdout, "<td><div class=\"objmap\" id=\"map%i\"></div>\n  <script>\n    const map%i = L.map('map%i', { zoomControl: false, attributionControl: false });\n    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map%i);\n    const g%i = hexEwkbToGeoJSON('%s'); \n    const lg%i = L.geoJSON(g%i);\n    g%i.geometry.coordinates[1] = g%i.geometry.coordinates[0];\n    g%i.geometry.coordinates[0] = [[180, -90], [180, 90], [-180, 90], [-180, -90]]; \n    L.geoJSON(g%i, objstyle).addTo(map%i);\n    map%i.fitBounds(lg%i.getBounds());\n   </script>", nmap, nmap, nmap, nmap, nmap, ewkbhex, nmap, nmap, nmap, nmap, nmap, nmap, nmap, nmap, nmap);
+				fprintf(stdout, "<td><div class=\"objmap\" id=\"map%i\"></div>\n  <script>\n    ewkbMap('%s', 'map%i');\n   </script>", nmap, ewkbhex, nmap);
 				nmap++;
 			} else if (bool_t) {
 				int bool_ok = PQgetvalue(res, i, j)[0] == 't';
