@@ -1,4 +1,4 @@
--- ОБНОВЛЕНИЕ ВСЕХ ОБНОВЛЯЕМЫХ ИСТОЧНИКОВ ДАННЫХ ПО БИРЮЛЁВСКОМУ ДЕНДРОПАРКУ 
+-- ОБНОВЛЕНИЕ ВСЕХ ОБНОВЛЯЕМЫХ ИСТОЧНИКОВ ДАННЫХ ПО БИРЮЛЁВСКОМУ ДЕНДРОПАРКУ
 
 -- PastVu
 refresh materialized view "Бирюлёвский дендропарк: PastVu"."∀ curl";
@@ -8,6 +8,7 @@ refresh materialized view "Бирюлёвский дендропарк: WikiData
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН";
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: надобъект";
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: типы";
+refresh materialized view "Бирюлёвский дендропарк: WikiData"."Водоёмы";
 
 -- Таблицы из статьи Википедии о Бирюлёвском дендропарке
 refresh materialized view "Бирюлёвский дендропарк: Википедия"."Аллеи";

@@ -161,7 +161,7 @@ comment on view "Бирюлёвский дендропарк: OSM"."Обсадк
 create or replace view "Бирюлёвский дендропарк: OSM"."Водоёмы" as
 select a.osm_id,
     a.osm_type,
-        a.geom,    
+        a.geom,
     a.tags ->> 'name' "название",
     a.tags ->> 'alt_name' "название доп",
     st_area(a.geom) AS "площадь",
@@ -170,13 +170,13 @@ select a.osm_id,
     a.tags ->> 'start_date'::text AS "Построено",
     a.tags ->> 'wikidata'::text AS "WikidataQ",
     a.tags ->> 'water'::text AS "тип",
-    a.tags ->> 'width'::text AS "ширина",    
-    a.tags - 'name'::text - 'note'::text - 'description'::text - 'wikidata'::text - 'start_date'::text - 'natural' - 'width' - 'alt_name' - 'water' as tags,    
+    a.tags ->> 'width'::text AS "ширина",
+    a.tags - 'name'::text - 'note'::text - 'description'::text - 'wikidata'::text - 'start_date'::text - 'natural' - 'width' - 'alt_name' - 'water' as tags,
     a."OSM URL"
  from  "Бирюлёвский дендропарк: OSM"."∀" a
 where (a.tags ->> 'natural'::text) = 'water'::text
    or (a.tags ->> 'waterway'::text) is not null
-order by площадь desc   
+order by площадь desc
    ;
 
 -- конец
