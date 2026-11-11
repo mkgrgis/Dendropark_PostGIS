@@ -1,4 +1,6 @@
 #!/bin/bash
+[ -z "$1" ] && exit;
+
 cd "$1";
 htt="$(dirname "$0")/pghtmltable/pghtmltable.sh";
 cp "$(dirname "$0")/pghtmltable/html/"* . -v;
@@ -11,5 +13,10 @@ ht='Cводка_аллей.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'selec
 ht='Названия_аллей.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Кл. аллеи названия";' "$ht";
 ht='Длины_аллей.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Кл. аллеи длины";' "$ht";
 ht='Прочее_аллей.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Кл. аллеи другое";' "$ht";
+
+ht='Cводка_ДТС.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."ДТС сводка";' "$ht";
+ht='Данные_ДТС.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."ДТС данные";' "$ht";
+
+ht='Сводка_водоёмов.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Водоёмы сводка";' "$ht";
 
 python3 -m http.server;
