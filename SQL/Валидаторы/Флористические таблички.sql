@@ -48,19 +48,22 @@ select o.osm_id is not null "OSM",
 ;
 
 -- Некомплектные случаи: 1 дубль фото на Викискладе + 1 табличка образца 1962 года + OSM плакаты о растениях
-select o.osm_id is not null "OSM",
+drop view "Бирюлёвский дендропарк"."Неполные флористические таблички";
+create or replace view "Бирюлёвский дендропарк"."Неполные флористические таблички" as
+select o.название "OSM назв",
        wc.pageid is not null "Викисклад",
        wp."Адрес" is not null "Википедия",
        wp."Название" "wp назв",
-       o.название "OSM назв",
+       o.osm_id is not null "на OSM как табличка",
        wc.title,
        wp."Файл",
        o.tags ->> 'wikimedia_commons' "OSM файл",
        wp."Указание на аллею",
+       o.создано "Дата установки",
        o.tags ->> 'was:tourism'::text = 'information' "Демонтирована",
        round(ST_Distance(wc.φλ₁::geography, o.geom::geography)::numeric, 1) "От фото до ОСМ точки",
        round(ST_Distance(wc.φλ₀::geography, o.geom::geography)::numeric, 1) "От фотографа до ОСМ точки",
-       'https://openstreetmap.org/'|| osm_type || '/' || osm_id "OSM URL",
+       o."OSM URL",
        wc."URL" "ВикиСклад URL",
        wp."Адрес",
        o.geom "φλ OSM",
@@ -75,7 +78,8 @@ select o.osm_id is not null "OSM",
        and wc.pageid is not null
        and (wp."Адрес" is not null or wp."Указание на аллею" is not null)
        and wp."OSM URL" = o."OSM URL" and  wp."Название" = o.название
-       );
+       )
+order by создано asc;
 
 with b as (
 select "Адрес",

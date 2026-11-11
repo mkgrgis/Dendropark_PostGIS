@@ -19,4 +19,6 @@ ht='Данные_ДТС.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select *
 
 ht='Сводка_водоёмов.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Водоёмы сводка";' "$ht";
 
+ht='Некомплектные_таблички.html'; rm -v "$ht"; PGPASSWORD="111111" "$htt" 'select * from "Бирюлёвский дендропарк"."Неполные флористические таблички";' "$ht";
+
 python3 -m http.server;
