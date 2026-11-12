@@ -18,7 +18,7 @@ if [ ! -s "$f.osm" ]; then
   echo " OSM Overpass - 0 xml";
   exit;
 else
-  osmium export --no-progress --config='osmium.conf' -f pg "$f.osm" -o "$f.pg" && echo "osmium ✔";
+  osmium export --no-progress --config="$(dirname "$0")/osmium.conf" -f pg "$f.osm" -o "$f.pg" && echo "osmium ✔";
   echo -n "PostGIS geom: "$(wc -l "$f.pg")" ";
   echo "truncate table \"$2\".\"∀ osmium\";" | psql -e "$pgurl";
   echo "\\copy \"$2\".\"∀ osmium\" FROM '$f.pg';" | psql -e "$pgurl";
