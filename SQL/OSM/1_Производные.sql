@@ -158,7 +158,7 @@ select st_union(geom) geom,
  group by (tags ->> 'wikidata'::text);
 comment on view "Бирюлёвский дендропарк: OSM"."Обсадки аллей Wikidata" is 'Обсадки и бордюры аллей с указанием кода викиданных';
 
-drop view "Бирюлёвский дендропарк: OSM"."Водоёмы";
+-- drop view "Бирюлёвский дендропарк: OSM"."Водоёмы";
 create or replace view "Бирюлёвский дендропарк: OSM"."Водоёмы" as
 select a.osm_id,
     a.osm_type,
