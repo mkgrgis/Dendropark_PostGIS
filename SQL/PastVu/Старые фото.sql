@@ -1,6 +1,7 @@
 create schema "Бирюлёвский дендропарк: PastVu";
 
-create materialized view "Бирюлёвский дендропарк: PastVu"."∀ curl" as
+-- Скачка всего в окрестностях
+create or replace view "Бирюлёвский дендропарк: PastVu"."∀ curl" as
 with c as (
 	select '[[[37.6702389,55.5878667],[37.685957,55.5878667],[37.685957,55.6067487],[37.6702389,55.6067487],[37.6702389,55.5878667]]]' as q,
 	false as paint
@@ -39,15 +40,19 @@ select (a."JSON" ->> 'cid'::text)::integer AS cid,
 	   a."JSON" ->> 'source'::text AS source
   from json_table a;
 
+-- Может отвечать долго, хотя обычно в 5 секунд укладывается с запасом
+set http.curlopt_timeout_msec = 20000;
 
 -- Исторические фотографии в границах парка
-CREATE MATERIALIZED VIEW "Бирюлёвский дендропарк: PastVu"."PastVu парк ∀"
-TABLESPACE pg_default
+create materialized view "Бирюлёвский дендропарк: PastVu"."PastVu парк ∀"
+tablespace pg_default
 as
-SELECT p.*,
+select p.*,
 	   st_intersection("ог".geom, p."φλ₀") AS geom,
 	   st_geometrytype(st_intersection("ог".geom, p."φλ₀")) AS geom_type
-  FROM "Бирюлёвский дендропарк: PastVu"."∀ curl" p
-  JOIN "Бирюлёвский дендропарк: OSM"."Основная граница" "ог"
-	ON st_contains("ог".geom, p."φλ₀")
-  WITH DATA;
+  from "Бирюлёвский дендропарк: PastVu"."∀ curl" p
+  join "Бирюлёвский дендропарк: OSM"."Основная граница" "ог"
+	on st_contains("ог".geom, p."φλ₀")
+  with data;
+
+-- конец

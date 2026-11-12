@@ -13,7 +13,7 @@ jobs:
       PGUSER : 'Географ'
       PGPORT : '5432'
       PGHOST : '127.0.0.1'
-      test_schema : 'data'
+      pg_ver : '18'
 
     name: Разворачивание PostgreSQL, загрузка данных
     runs-on: ubuntu-latest
@@ -26,10 +26,19 @@ jobs:
 
       - name: Установка PostgreSQL, библиотек для компиляции утилиты, местных стандартов вывода
         run: |
-          sudo apt install -y apt-transport-https
-          sudo apt install postgresql-18 postgresql-18-http postgresql-18-semver postgresql-18-postgis-3 osmium-tool -y
+          sudo apt install -y apt-transport-https zip
+          sudo apt install postgresql-${{ env.pg_ver }} postgresql-${{ env.pg_ver }}-http postgresql-${{ env.pg_ver }}-semver postgresql-${{ env.pg_ver }}-postgis-3 osmium-tool -y
           sudo apt install language-pack-ru-base language-pack-ru -y && sudo locale-gen ru_RU
           sudo systemctl restart postgresql;
+
+      - name: Компиляция unzip
+        run: |
+          sudo ./pg_c_unzip/sys_compile.sh;
+
+      - name: Компиляция pghtmltable
+        run: |
+          sudo apt install libpq-dev pkg-config
+          (cd pghtmltable; ./compile.sh;)
 
       - name: Подготовка пользователя и БД PostgreSQL
         run: bash test/db_init.sh '${{ env.PGDATABASE }}' '${{ env.PGUSER }}' '${{ env.PGPASSWORD }}';

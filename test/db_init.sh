@@ -5,6 +5,7 @@ echo "CREATE EXTENSION postgis;
 CREATE EXTENSION http;
 CREATE EXTENSION file_fdw;
 CREATE EXTENSION semver;
+CREATE EXTENSION pg_unzip;
 
 CREATE SERVER \"Wiki дендропарк\" FOREIGN DATA WRAPPER file_fdw;
 grant usage on foreign server \"Wiki дендропарк\" to \"$2\";

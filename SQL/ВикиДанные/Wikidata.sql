@@ -1,6 +1,9 @@
 create schema "Бирюлёвский дендропарк: WikiData";
 
-drop materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть" cascade;
+-- Может отвечать долго, хотя обычно в 5 секунд укладывается с запасом
+set http.curlopt_timeout_msec = 200000;
+
+-- drop materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть" cascade;
 create materialized view "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть" as
 with wikidata_json as (
 select
@@ -47,7 +50,7 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Q",
 from element
 order by "№", "название";
 
-drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: типы";
+-- drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: типы";
 create materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: типы" as
 with wikidata_json as (
 select
@@ -79,7 +82,7 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
 from element
 order by "№ в ОКН", "Объект Q";
 
-drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: надобъект";
+-- drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: надобъект";
 create materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН: надобъект" as
 with wikidata_json as (
 select
@@ -113,7 +116,7 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
 from element
 order by "№ в ОКН", "Объект Q";
 
-drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН";
+-- drop materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН";
 create materialized view "Бирюлёвский дендропарк: WikiData"."Элементы ОКН" as
 with wikidata_json as (
 select
@@ -147,13 +150,13 @@ select split_part(j -> 'элемент' ->> 'value', '/', -1) "Объект Q",
 from element
 order by "№ в ОКН", "Объект Q";
 
-drop view "Бирюлёвский дендропарк: WikiData"."Аллеи ОКН" cascade;
+-- drop view "Бирюлёвский дендропарк: WikiData"."Аллеи ОКН" cascade;
 create or replace view "Бирюлёвский дендропарк: WikiData"."Аллеи ОКН" as
 select d.*
   from "Бирюлёвский дендропарк: WikiData"."Дорожно-тропиночная сеть" d
  where "№" is not null or "Q полной аллеи" is not null;
 
-drop materialized view "Бирюлёвский дендропарк: WikiData"."Водоёмы";
+-- drop materialized view "Бирюлёвский дендропарк: WikiData"."Водоёмы";
 create materialized view "Бирюлёвский дендропарк: WikiData"."Водоёмы" as
 with wikidata_json as (
 select
