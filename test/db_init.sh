@@ -4,6 +4,7 @@ echo "create database \"$1\" owner \"$2\";" | sudo -u postgres psql;
 echo "CREATE EXTENSION postgis;
 CREATE EXTENSION http;
 CREATE EXTENSION file_fdw;
+CREATE EXTENSION semver;
 
 CREATE SERVER \"Wiki дендропарк\" FOREIGN DATA WRAPPER file_fdw;
 grant usage on foreign server \"Wiki дендропарк\" to \"$2\";
