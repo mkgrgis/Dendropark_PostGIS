@@ -33,7 +33,12 @@ jobs:
 
       - name: Компиляция unzip
         run: |
-          sudo ./pg_c_unzip/sys_compile.sh;
+          sudo sudo apt install -y libzip-dev pkg-config;
+          sudo apt install -y postgresql-common;
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y;
+          sudo apt update;
+          sudo apt install postgresql-server-dev-18 postgresql-client-18;
+          ./pg_c_unzip/sys_compile.sh;
 
       - name: Компиляция pghtmltable
         run: |
