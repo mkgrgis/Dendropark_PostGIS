@@ -3,7 +3,7 @@
 [ ! -f 'postgres.url' ] && echo "✘ postgres.url" && exit;
 pgurl=$(cat 'postgres.url');
 r=$(echo "select '+';" | psql -A -t -q "$pgurl");
-[ "$r" != "+" ] && echo "$r" && echo "✘ PostgreSQL URL ??? $pgurl" && exit;
+[ "$r" != "+" ] && echo "$r" && echo "✘ PostgreSQL URL ??? $pgurl" && exit 100;
 
 bbox="$1";
 apiadr="https://overpass-api.de/api/interpreter?data=";
@@ -16,7 +16,7 @@ f="$2 $s";
 wget "$apiadr" -O "$f.osm";
 if [ ! -s "$f.osm" ]; then
   echo " OSM Overpass - 0 xml";
-  exit;
+  exit 10;
 else
   osmium export --no-progress --config="$(dirname "$0")/osmium.conf" -f pg "$f.osm" -o "$f.pg" && echo "osmium ✔";
   echo -n "PostGIS geom: "$(wc -l "$f.pg")" ";
