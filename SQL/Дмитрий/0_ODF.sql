@@ -21,39 +21,14 @@ select text_to_bytea(content), url.url
 from url,
      http_get(url.url);
 
--- Функция создаётся от администратора, требует установки недоверенного языка Python_
--- обычно помещаемого в отдельном пакете ОС
--- Создание Выполняется от администратора, позднее используется кем угодно
-/*
-create or replace function unzip_bytea_rows(zip_blob bytea)
-returns table(filename text, file_data bytea)
-language plpython3u as $$
-import io, zipfile
-buf = io.BytesIO(zip_blob)
-zf = zipfile.ZipFile(buf)
-for info in zf.infolist():
-    if not info.is_dir():
-        yield (info.filename, zf.read(info))
-$$;
-*/
-
 -- Листы сохранённых ods документов, представляет соответствующие XML ветви и названия;
+-- drop view "Бирюлёвский дендропарк: Дмитрий"."ODF XML листы" cascade;
 create view "Бирюлёвский дендропарк: Дмитрий"."ODF XML листы" as
-with /*unzip as
-(
-select unzip_bytea_rows(ods) r,
-       o."№",
-       o."Время",
-       o.url
-  from "Бирюлёвский дендропарк: Дмитрий"."ods" o
-),*/
-xml_content as (
+with xml_content as (
 select "№",
        "Время",
        url,
        'content.xml' filename,
-       -- (r).filename,
-       --convert_from((r).file_data, 'UTF8')::xml xml,
        convert_from(unzip_bytea(ods, 'content.xml'), 'UTF8')::xml xml,
        ARRAY[ARRAY['office','urn:oasis:names:tc:opendocument:xmlns:office:1.0'],
              ARRAY['table', 'urn:oasis:names:tc:opendocument:xmlns:table:1.0']
