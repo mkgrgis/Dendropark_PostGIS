@@ -53,27 +53,10 @@ inner join "Бирюлёвский дендропарк: Дмитрий"."ДТС
    and atx[1] != upper(atx[1])
  order by "№ строки";
 
-refresh  materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС";
-
-/*
-create foreign table "Бирюлёвский дендропарк: Дмитрий"."Экспликация wget" (
-    "Адрес" varchar null,
-    "Сохранны" varchar null, -- Растительность по экспликациям 1978/2016 гг., подтверждённая,
-    "Ведомость 1965 года" varchar null, -- Растительность по ведомости 1965 года,
-    "Утрачено" varchar null, -- Растительность по экспликации 1978, исчезнувшая к 2016 г.,
-    "Новая" varchar null, -- Растительность, высаженная в 2017-2019 гг., либо выявленная после 2005 г.,
-    "Обсадка" varchar null
-) server "Wiki дендропарк"
-options ( program  'mkdir /tmp/exp;
-cd /tmp/exp;
-wget https://moscowparks.narod.ru/docs/explication.ods >/dev/null;
-libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":44,34,UTF8,1,,0,false,true,false,false,false,-1 /tmp/exp/explication.ods > /dev/null;
-cat explication-Лист1.csv;
-', format 'csv', header 'true');
-*/
+-- refresh  materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС";
 
 -- Первичная форма экспликации до разбора пометок видов
--- drop materialized view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" cascade
+-- drop materialized view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" cascade;
 create materialized view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
@@ -85,16 +68,17 @@ select max("Время") over (partition by url) mt, "Время",
 )
 select "№ строки",
        split_part(atx[1], E'\n', 1) "Адрес",
-       split_part(atx[1], E'\n', 2) "Название",
+       regexp_replace(split_part(atx[1], E'\n', 2), '\(|\)', '', 'g') "Название",
        regexp_substr(atx[1], '^\d+')::int2 "Уч.",
        regexp_substr(atx[1], '(?<=×.?)\d+')::int2 "№₀",
        regexp_substr(split_part(atx[1], E'\n', 1), '(?<=×).+') "№",
-       atx[2] "Подтв. 1978/2016",
-       atx[3] "Проект 1965",
-       atx[4] "Исчез 1976-2016",
-       atx[5] "По 1995",
-       atx[6] "Новая",
-       atx[7] "Обсадка или жив.изг."
+       atx[2] "Код табличек",
+       atx[3] "Подтв. 1978/2016",
+       atx[4] "Проект 1965",
+       atx[5] "Исчез 1976-2016",
+       atx[6] "По 1995",
+       atx[7] "Новая",
+       atx[8] "Обсадка или жив.изг."
   from b
  where "Время" = mt -- По самому позднему из сохранённых файлов
    and "№ строки" > 2
