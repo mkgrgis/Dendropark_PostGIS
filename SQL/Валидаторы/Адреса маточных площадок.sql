@@ -148,10 +148,9 @@ o as (
 select distinct true "ОСМ",
        "Уч." "Уч. ОСМ",
        "№" "ref OSM",
-       "ref" "№ ОСМ",
        "из ОКН",
        "объектов OSM",
-       "Уч." || '×' || "ref" || case when ref0 is not null then '(' || ref0 || ')' else '' end "Адрес",
+       "Уч." || '×' || "ref OSM" || case when ref0 is not null then '(' || ref0 || ')' else '' end "Адрес",
        case when "объектов OSM" = 1 then "URL" else null end "URL"
   from "Бирюлёвский дендропарк: OSM"."№№ пл. по ОСМ" s
 -- where s."из ОКН"
