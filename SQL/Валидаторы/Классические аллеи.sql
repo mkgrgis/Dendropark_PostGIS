@@ -75,9 +75,8 @@ select ok."Q",
   order by coalesce (ok."№", a1."№");
 
 -- Прочее
-drop view "Бирюлёвский дендропарк"."Кл. аллеи другое";
+-- drop view "Бирюлёвский дендропарк"."Кл. аллеи другое";
 create view "Бирюлёвский дендропарк"."Кл. аллеи другое" as
-
 select ok."Q",
        ok."№" "№ в ОКН",
        ok.название "Назв Викиданные",
@@ -133,3 +132,5 @@ select ok."Q",
   left join "Бирюлёвский дендропарк: OSM"."ДТС Wikidata" aw1
     on ok."№" is null and ok."Q полной аллеи" = aw1."Q"*/
   order by coalesce (ok."№", a1."№");
+
+-- конец
