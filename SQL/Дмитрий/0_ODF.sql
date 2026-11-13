@@ -13,7 +13,8 @@ create table "Бирюлёвский дендропарк: Дмитрий".ods (
 );
 
 -- truncate table "Бирюлёвский дендропарк: Дмитрий"."ods";
--- Запись очередного ods документа
+-- Запись очередного ods документа, может отвечать долго, хотя обычно в 5 секунд укладывается с запасом
+set http.curlopt_timeout_msec = 200000;
 insert into "Бирюлёвский дендропарк: Дмитрий"."ods" (ods, url)
 with url as (select 'https://moscowparks.narod.ru/docs/explication.ods' url)
 select text_to_bytea(content), url.url
@@ -73,7 +74,7 @@ select "№",
        row_number() over (partition by "№", filename) "№ листа",
        table_name,
        table_xml
-from table_xml
+from table_xml;
 
 --drop view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки" cascade;
 -- Развёрнутый вид всех ячеек всех листов всех ods документов.
