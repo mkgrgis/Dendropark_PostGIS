@@ -43,8 +43,11 @@ jobs:
       - name: Подготовка пользователя и БД PostgreSQL
         run: bash test/db_init.sh '${{ env.PGDATABASE }}' '${{ env.PGUSER }}' '${{ env.PGPASSWORD }}';
 
+      - name: Загрузка данных OSM
+        run: bash test/load_osm.sh;
+
       - name: Загрузка данных
-        run: bash test/load.sh ${{ env.test_schema }};
+        run: bash test/load.sh;
 
       - name: Проверка итогового запроса
         run: bash test/control.sh ${{ env.test_schema }}
