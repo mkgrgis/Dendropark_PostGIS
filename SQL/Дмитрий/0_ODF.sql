@@ -34,7 +34,6 @@ select "№",
              ARRAY['table', 'urn:oasis:names:tc:opendocument:xmlns:table:1.0']
             ] odf_ns
 from  "Бирюлёвский дендропарк: Дмитрий"."ods" o -- unzip
---where (r).filename = 'content.xml'
 ),
 table_xml as (
 select "№", "Время", filename, url,
