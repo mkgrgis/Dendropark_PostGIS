@@ -4,7 +4,7 @@
 create materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС группы" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
-       atx,
+       cell atx,
        "№ строки"
   from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]"
  where url = 'https://moscowparks.narod.ru/docs/explication.ods'
@@ -25,7 +25,7 @@ select "№ строки",
 create materialized view "Бирюлёвский дендропарк: Дмитрий"."ДТС" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
-       atx,
+       cell atx,
        "№ строки"
   from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]"
  where url = 'https://moscowparks.narod.ru/docs/explication.ods'
@@ -60,11 +60,11 @@ inner join "Бирюлёвский дендропарк: Дмитрий"."ДТС
 create materialized view "Бирюлёвский дендропарк: Дмитрий"."Экспликация" as
 with b as (
 select max("Время") over (partition by url) mt, "Время",
-       atx, "№ строки"
+       cell atx, "№ строки"
   from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]"
  where url = 'https://moscowparks.narod.ru/docs/explication.ods'
    and "№ листа" = 1
-   and atx[1] != ''
+   and cell[1] != ''
 )
 select "№ строки",
        split_part(atx[1], E'\n', 1) "Адрес",
