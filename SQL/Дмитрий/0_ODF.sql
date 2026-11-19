@@ -29,7 +29,7 @@ select "№",
        "Время",
        url,
        'content.xml' filename,
-       convert_from(unzip_bytea(ods, 'content.xml'), 'UTF8')::xml xml,
+       convert_from(bytea_unzip(ods, 'content.xml'), 'UTF8')::xml xml,
        ARRAY[ARRAY['office','urn:oasis:names:tc:opendocument:xmlns:office:1.0'],
              ARRAY['table', 'urn:oasis:names:tc:opendocument:xmlns:table:1.0']
             ] odf_ns
