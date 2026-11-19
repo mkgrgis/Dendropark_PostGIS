@@ -50,93 +50,25 @@ select "№",
        table_xml
 from table_xml;
 
---drop view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки" cascade;
--- Развёрнутый вид всех ячеек всех листов всех ods документов.
-create or replace view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки" as
-with b as (
-select "№",
-       "Время",
-       url,
-       table_xml xml,
-       "№ листа",
-       ARRAY[ARRAY['table', 'urn:oasis:names:tc:opendocument:xmlns:table:1.0'],
-             ARRAY['text', 'urn:oasis:names:tc:opendocument:xmlns:text:1.0']
-            ] odf_ns
-  from "Бирюлёвский дендропарк: Дмитрий"."ODF XML листы" l
-),
-tr as (
-    select "№",
-           "Время",
-           url,
-           "№ листа",
-           odf_ns,
-           unnest(xpath('//table:table-row', xml, odf_ns)) AS row_node
-    from b
-  ),
-tr1 as (
-select "№",
-       "Время",
-       url,
-       "№ листа",
-       odf_ns,
-       row_number() over (partition by "№", "Время", url, "№ листа") "№ строки",
-       row_node
-  from tr
-),
-rc as (
-select "№",
-       "Время",
-       url,
-       "№ листа",
-       "№ строки",
-       odf_ns,
-       unnest(xpath('//table:table-cell', row_node, odf_ns)) cell_xml,
-       row_node
-  from tr1
-),
-rc1 as (
-select "№",
-       "Время",
-       url,
-       "№ листа",
-       "№ строки",
-       row_node,
-       cell_xml,
-       ((xpath('//@table:number-columns-repeated', cell_xml, odf_ns)
-        )[1])::text::int n_rep,
-       array_to_string(xpath('//text:p/text()', cell_xml, odf_ns), '
-') c_text
-   from rc),
-rc2 as (
-select "№",
-       "Время",
-       url,
-       "№ листа",
-       "№ строки",
-       row_node,
-       n_rep,
-       unnest( array[c_text] || array_fill(null::text, array[coalesce(n_rep - 1, 0)])) txt
-  from rc1
-)
-select "№",
-       "Время",
-       url,
-       "№ листа",
-       "№ строки",
-       row_number() over (partition by "№", "Время", url, "№ листа", "№ строки") "№ ячейки",
-       row_node,
-       n_rep,
-       txt
-  from rc2;
-
 -- Свёрнутый в массив вид всех ячеек всех листов всех ods документов.
 create or replace view "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки[]" as
+with dc as (
+select "№",
+       "Время",
+       url,
+       "№ листа",       
+       decompose_ods_table_node(table_xml) cell       
+  from "Бирюлёвский дендропарк: Дмитрий"."ODF XML листы" l
+), rn as (
 select "№",
        "Время",
        url,
        "№ листа",
-       "№ строки",
-       array_agg(txt) atx
-  from "Бирюлёвский дендропарк: Дмитрий"."ODF XML ячейки"
- group by "№", "Время", url, "№ листа", "№ строки"
- order by "№", "Время", url, "№ листа", "№ строки";
+       row_number() over (partition by "№", "Время", url, "№ листа") "№ строки",
+       cell       
+  from dc
+)
+select *
+  from rn  
+ where cardinality(cell) > 0
+  order by "№", "Время", url, "№ листа", "№ строки";

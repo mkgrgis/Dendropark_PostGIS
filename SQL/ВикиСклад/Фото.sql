@@ -1,7 +1,7 @@
 create schema "Бирюлёвский дендропарк: ВикиСклад";
 
 -- Отвечает долго
-set http.curlopt_timeout_msec = 200000;
+set http.curlopt_timeout_msec = 2000000;
 
 -- Получение данных без промежуточных утилит
 create materialized view "Бирюлёвский дендропарк: ВикиСклад"."Wikimap" as
