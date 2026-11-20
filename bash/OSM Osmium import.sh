@@ -15,17 +15,17 @@ r=$(echo "select '+';" | psql -A -t -q "$pgurl");
 [ -z "$4" ] && exit 100; # Без точки доступа к OSM OverpassAPI не работаем
 
 bbox="$1";
-if [ -z "$4" ]; then
-  apiadr="https://www.openstreetmap.org/api/0.6/map?bbox=$bbox";
-else
-  apiadr="$4[out:xml];(++node($bbox);<;);(._;>;);out+meta;";
-fi
 s=$(date '+%s');
 f="$2 $s";
-#wget "$apiadr" -O - -o /dev/null > "$f.osm";
-wget "$apiadr" -O "$f.osm";
+
+if [ -z "$4" ]; then
+  wget "https://www.openstreetmap.org/api/0.6/map?bbox=$bbox" -O "$f.osm";
+else
+  wget "$4[out:xml];(++node($bbox);<;);(._;>;);out+meta;" -O "$f.osm";
+fi
 if [ ! -s "$f.osm" ]; then
   echo " OSM Overpass - 0 xml";
+  rm "$f.osm";
   exit 10;
 else
   osmium export --no-progress --config="$(dirname "$0")/osmium.conf" -f pg "$f.osm" -o "$f.pg" && echo "osmium ✔";
