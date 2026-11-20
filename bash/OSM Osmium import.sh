@@ -15,9 +15,11 @@ r=$(echo "select '+';" | psql -A -t -q "$pgurl");
 [ -z "$4" ] && exit 100; # Без точки доступа к OSM OverpassAPI не работаем
 
 bbox="$1";
-apiadr="$4";
-apiadr="$apiadr[out:xml];(++node($bbox);<;);(._;>;);out+meta;";
-echo "$apiadr";
+if [ -z "$4" ]; then
+  apiadr="https://www.openstreetmap.org/api/0.6/map?bbox=$bbox";
+else
+  apiadr="$4[out:xml];(++node($bbox);<;);(._;>;);out+meta;";
+fi
 s=$(date '+%s');
 f="$2 $s";
 #wget "$apiadr" -O - -o /dev/null > "$f.osm";
