@@ -12,13 +12,12 @@ r=$(echo "select '+';" | psql -A -t -q "$pgurl");
 [ "$r" != "+" ] && echo "$r" && echo "✘ PostgreSQL URL ??? $pgurl" && exit 100;
 
 [ -z "$2" ] && exit 100; # Без схемы не работаем
-[ -z "$4" ] && exit 100; # Без точки доступа к OSM OverpassAPI не работаем
 
 bbox="$1";
 s=$(date '+%s');
 f="$2 $s";
 
-if [ -z "$4" ]; then
+if [ -z "$4" ]; then # Без точки доступа к OSM OverpassAPI пробуем закачку с адреса основного загрузчика
   wget "https://www.openstreetmap.org/api/0.6/map?bbox=$bbox" -O "$f.osm";
 else
   wget "$4[out:xml];(++node($bbox);<;);(._;>;);out+meta;" -O "$f.osm";
