@@ -18,7 +18,9 @@ s=$(date '+%s');
 f="$2 $s";
 
 if [ -z "$4" ]; then # Без точки доступа к OSM OverpassAPI пробуем закачку с адреса основного загрузчика
-  wget "https://www.openstreetmap.org/api/0.6/map?bbox=$bbox" -O "$f.osm";
+  IFS=',' read -r minLat minLon maxLat maxLon <<< "$bbox";
+  bbox2="$minLon,$minLat,$maxLon,$maxLat";
+  wget "https://www.openstreetmap.org/api/0.6/map?bbox=$bbox2" -O "$f.osm";
 else
   wget "$4[out:xml];(++node($bbox);<;);(._;>;);out+meta;" -O "$f.osm";
 fi
