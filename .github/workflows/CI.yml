@@ -31,7 +31,7 @@ jobs:
           sudo apt install language-pack-ru-base language-pack-ru -y && sudo locale-gen ru_RU
           sudo systemctl restart postgresql;
 
-      - name: Компиляция bytea_unzip
+      - name: Компиляция bytea_unzip и pg_wget
         run: |
           sudo sudo apt install -y libzip-dev libxml2-dev pkg-config git;
           sudo apt install -y postgresql-common;
@@ -40,6 +40,8 @@ jobs:
           sudo apt install postgresql-server-dev-18 postgresql-client-18;
           git clone https://github.com/mkgrgis/bytea_unzip.git;
           ( cd bytea_unzip; make USE_PGXS=1; sudo make install USE_PGXS=1;)
+          git clone https://github.com/mkgrgis/pg_wget.git;
+          ( cd pg_wget; make USE_PGXS=1; sudo make install USE_PGXS=1;)
 
       - name: Компиляция pghtmltable
         run: |

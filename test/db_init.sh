@@ -3,12 +3,8 @@ echo "create database \"$1\" owner \"$2\";" | sudo -u postgres psql;
 
 echo "CREATE EXTENSION postgis;
 CREATE EXTENSION http;
-CREATE EXTENSION file_fdw;
 CREATE EXTENSION semver;
 CREATE EXTENSION bytea_unzip;
-
-CREATE SERVER \"Wiki дендропарк\" FOREIGN DATA WRAPPER file_fdw;
-grant usage on foreign server \"Wiki дендропарк\" to \"$2\";
-grant pg_execute_server_program to \"$2\"; " | sudo -u postgres psql -d "$1";
+CREATE EXTENSION pg_wget;
 
 echo "postgresql://$2:$3@127.0.0.1:5432/$1" > postgres.url; 

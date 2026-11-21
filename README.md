@@ -4,7 +4,7 @@
 **Данный программный продукт не предназначен для Windows или WSL и полностью не работоспособен в этой группе ОС**.
 
 ## Подготовка базы данных
-1. Установите любую версию PostgreSQL 9+ и преобразователь данных [osmium](https://github.com/joto/osmium). Например, из пакетов deb используя программу `apt`. Типичные названия пакетов `postgresql-18` и `osmium-tool` соотвественно.
+1. Установите любую версию PostgreSQL 16+ и преобразователь данных [osmium](https://github.com/joto/osmium). Например, из пакетов deb используя программу `apt`. Типичные названия пакетов `postgresql-19` и `osmium-tool` соотвественно.
 2. Создайте пользователя и базу данных для размещения геоданных
 ```bash
 sudo -u postgres bash;
@@ -22,15 +22,17 @@ CREATE DATABASE "Геоинформационная система" OWNER "Ге�
 ```bash
 psql -d "Геоинформационная система"
 ```
-SQL от администратора всех БД
-```
-CREATE EXTENSION postgis;
-CREATE EXTENSION http;
-CREATE EXTENSION file_fdw;
+Скачайте, скомпилируйте и установите себе в PostgreSQL нужной версии
+1.  https://github.com/mkgrgis/bytea_unzip
+2.  https://github.com/mkgrgis/pg_wget
 
-CREATE SERVER "Wiki дендропарк" FOREIGN DATA WRAPPER file_fdw;
-grant usage on foreign server "Wiki дендропарк" to "Геоинформатик";
-grant pg_execute_server_program to "Геоинформатик";
+Выполните SQL от администратора всех БД
+```
+CREATE EXTENSION postgis;       -- Работа с географическими объектами
+CREATE EXTENSION http;          -- Скачка из интернета
+CREATE EXTENSION semver;        -- Семантическая версия, так выражен № в паспорте ОКН
+CREATE EXTENSION bytea_unzip;   -- Распаковка zip архивов в PostgreSQL и разбор ячеек ODS листов
+CREATE EXTENSION pg_wget;       -- Скачка исходного кода разметки статьи Википедии
 ```
 
 4. Проверьте доступность пространственных типов данных и функций

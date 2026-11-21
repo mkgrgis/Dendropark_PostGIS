@@ -11,10 +11,11 @@ refresh materialized view "Бирюлёвский дендропарк: WikiData
 refresh materialized view "Бирюлёвский дендропарк: WikiData"."Водоёмы";
 
 -- Таблицы из статьи Википедии о Бирюлёвском дендропарке
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Аллеи";
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флора";
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флористические таблички";
-refresh materialized view "Бирюлёвский дендропарк: Википедия"."Ценные видовые раскрытия";
+refresh materialized view "Бирюлёвский дендропарк: Википедия".wget;
+-- refresh materialized view "Бирюлёвский дендропарк: Википедия"."Аллеи";
+-- refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флора";
+-- refresh materialized view "Бирюлёвский дендропарк: Википедия"."Флористические таблички";
+-- refresh materialized view "Бирюлёвский дендропарк: Википедия"."Ценные видовые раскрытия";
 
 -- Экспликация Дмитрия
 -- Запись очередного ods документа
