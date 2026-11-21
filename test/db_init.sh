@@ -5,6 +5,6 @@ echo "CREATE EXTENSION postgis;
 CREATE EXTENSION http;
 CREATE EXTENSION semver;
 CREATE EXTENSION bytea_unzip;
-CREATE EXTENSION pg_wget;
+CREATE EXTENSION pg_wget;" | sudo -u postgres psql -d "$1";
 
 echo "postgresql://$2:$3@127.0.0.1:5432/$1" > postgres.url; 
