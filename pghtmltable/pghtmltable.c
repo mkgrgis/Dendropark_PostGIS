@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
 	// Без запроса не имеет смысла
 	if (argc < 2) {
-		fprintf(stderr, "Usage: %s \"SQL query\"\nRetcodes: 1-no DB, 2-no good query, 3-SQL err", argv[0]);
+		fprintf(stderr, "Usage: %s \"SQL query\"\nRetcodes: 1-no DB, 2-no good query, 3-SQL err\n", argv[0]);
 		return 1;
 	}
 	query = argv[1];
