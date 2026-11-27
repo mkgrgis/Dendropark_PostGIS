@@ -39,6 +39,8 @@ jobs:
           sudo apt update;
           sudo apt install postgresql-server-dev-18 postgresql-client-18;
           echo 'Предпосылки готовы'
+          git submodule init
+          git submodule update
           echo '!!! bytea_unzip'
           #git clone https://github.com/mkgrgis/bytea_unzip.git;
           ( cd bytea_unzip; make USE_PGXS=1; sudo make install USE_PGXS=1;)
