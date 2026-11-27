@@ -38,8 +38,11 @@ jobs:
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y;
           sudo apt update;
           sudo apt install postgresql-server-dev-18 postgresql-client-18;
+          echo 'Предпосылки готовы'
+          echo '!!! bytea_unzip'
           #git clone https://github.com/mkgrgis/bytea_unzip.git;
           ( cd bytea_unzip; make USE_PGXS=1; sudo make install USE_PGXS=1;)
+          echo '!!! pg_wget'
           #git clone https://github.com/mkgrgis/pg_wget.git;
           ( cd pg_wget; make USE_PGXS=1; sudo make install USE_PGXS=1;)
 
