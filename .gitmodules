@@ -1,0 +1,6 @@
+[submodule "bytea_unzip"]
+	path = bytea_unzip
+	url = https://github.com/mkgrgis/bytea_unzip.git
+[submodule "pg_wget"]
+	path = pg_wget
+	url = https://github.com/mkgrgis/pg_wget.git
