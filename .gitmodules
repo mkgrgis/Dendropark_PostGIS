@@ -4,3 +4,6 @@
 [submodule "pg_wget"]
 	path = pg_wget
 	url = https://github.com/mkgrgis/pg_wget.git
+[submodule "pg_htmltable"]
+	path = pg_htmltable
+	url = https://github.com/mkgrgis/pg_htmltable.git

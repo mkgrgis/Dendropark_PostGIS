@@ -43,15 +43,15 @@ jobs:
           git submodule update
           echo '!!! bytea_unzip'
           #git clone https://github.com/mkgrgis/bytea_unzip.git;
-          ( cd bytea_unzip; git fetch; git merge; make USE_PGXS=1; sudo make install USE_PGXS=1;)
+          ( cd bytea_unzip; make USE_PGXS=1; sudo make install USE_PGXS=1;)
           echo '!!! pg_wget'
           #git clone https://github.com/mkgrgis/pg_wget.git;
-          ( cd pg_wget;     git fetch; git merge; make USE_PGXS=1; sudo make install USE_PGXS=1;)
+          ( cd pg_wget;     make USE_PGXS=1; sudo make install USE_PGXS=1;)
 
-      - name: Компиляция pghtmltable
+      - name: Компиляция pg_htmltable
         run: |
           sudo apt install libpq-dev pkg-config
-          (cd pghtmltable; ./compile.sh;)
+          (cd pg_htmltable; ./compile.sh;)
 
       - name: Подготовка пользователя и БД PostgreSQL
         run: bash test/db_init.sh '${{ env.PGDATABASE }}' '${{ env.PGUSER }}' '${{ env.PGPASSWORD }}';
